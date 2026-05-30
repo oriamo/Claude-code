@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>You're Invited 💕</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+
+  <div id="emoji-layer" aria-hidden="true"></div>
+
+  <!-- Screen 1: Invitation -->
+  <section id="screen-invite" class="screen active">
+    <div class="card">
+      <span class="heart-icon">💝</span>
+      <h1>Chinelo,<br>You're Invited to a<br>Home Cooked Dinner 🍽️</h1>
+      <p class="subtext">I've been thinking about you and I'd love to cook something special just for you. Will you join me?</p>
+      <div class="btn-group">
+        <button id="btn-yes" class="btn btn-yes">Yes! I'd love to 💕</button>
+        <button id="btn-no" class="btn btn-no">No</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 2: Date & Time -->
+  <section id="screen-datetime" class="screen">
+    <div class="card">
+      <span class="heart-icon">📅</span>
+      <h2>When works for you, Baby?</h2>
+      <p class="subtext">Pick a date and time and I'll make it perfect for you ✨</p>
+      <div id="calendar"></div>
+      <div class="time-picker">
+        <span class="time-label">Time:</span>
+        <div class="time-inputs">
+          <select id="pick-hour"></select>
+          <span class="colon">:</span>
+          <select id="pick-minute">
+            <option value="00">00</option>
+            <option value="15">15</option>
+            <option value="30">30</option>
+            <option value="45">45</option>
+          </select>
+          <select id="pick-ampm">
+            <option value="AM">AM</option>
+            <option value="PM" selected>PM</option>
+          </select>
+        </div>
+      </div>
+      <button id="btn-confirm-date" class="btn btn-yes" disabled>Confirm Date &amp; Time 💖</button>
+    </div>
+  </section>
+
+  <!-- Screen 3: Food Selection -->
+  <section id="screen-food" class="screen">
+    <div class="card">
+      <span class="heart-icon">🍴</span>
+      <h2>What would you like to eat, Baby?</h2>
+      <p class="subtext">Pick as many as you want — this is your night! 🌹</p>
+      <div id="food-grid"></div>
+      <div class="guest-fields">
+        <input id="guest-name" type="text" placeholder="Your name 💕" value="Chinelo">
+        <input id="guest-email" type="email" placeholder="Your email (for calendar invite) 📧">
+      </div>
+      <button id="btn-confirm-food" class="btn btn-yes" disabled>Confirm My Choices 🍽️</button>
+    </div>
+  </section>
+
+  <!-- Screen 4: Confirmation -->
+  <section id="screen-confirm" class="screen">
+    <div class="card">
+      <div id="confetti" aria-hidden="true"></div>
+      <span class="heart-icon">💕</span>
+      <h2>It's a Date, Baby! 💕</h2>
+      <p class="subtext">I can't wait to cook for you. You mean everything to me ❤️</p>
+      <div id="summary-box"></div>
+      <button id="btn-gcal" class="btn btn-yes">Add to Google Calendar 📅</button>
+      <button id="btn-ics" class="btn btn-secondary">Download Calendar File 📥</button>
+      <button id="btn-copy" class="btn btn-secondary">Copy Summary 📋</button>
+    </div>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
