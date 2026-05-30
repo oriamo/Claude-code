@@ -13,9 +13,10 @@
 // NOTE: Only the public key goes here. NEVER put the private key
 //       in client-side JavaScript.
 // ============================================================
-const EMAILJS_PUBLIC_KEY  = "fDaCZxeZnJVonXtOM";
-const EMAILJS_SERVICE_ID  = "service_o27ixzb";
-const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID";
+const EMAILJS_PUBLIC_KEY   = "fDaCZxeZnJVonXtOM";
+const EMAILJS_PRIVATE_KEY  = "Bvg9-Ue_tt6i8iTydHPki";
+const EMAILJS_SERVICE_ID   = "service_o27ixzb";
+const EMAILJS_TEMPLATE_ID  = "template_46to5a5";
 
 const HOST_EMAIL = "dara.1440p@gmail.com";
 
