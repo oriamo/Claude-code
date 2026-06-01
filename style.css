@@ -366,6 +366,30 @@ h2 {
 .food-name  { font-size: 0.8rem; font-weight: 600; color: var(--text); }
 
 /* ===== GUEST FIELDS ===== */
+.custom-food-row {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.6rem 0;
+}
+
+.custom-food-row input {
+  flex: 1;
+  padding: 0.65rem 1rem;
+  border: 2px solid var(--pink-mid);
+  border-radius: 3rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: var(--text);
+  background: #fff;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.custom-food-row input:focus { border-color: var(--pink-dark); }
+
+.custom-food-row .btn { white-space: nowrap; padding: 0.65rem 1.1rem; }
+
 .guest-fields {
   display: flex;
   flex-direction: column;

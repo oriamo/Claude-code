@@ -29,7 +29,8 @@ const FOODS = [
   { name: "Gizzdodo",  emoji: "🍗" },
   { name: "Spaghetti", emoji: "🍜" },
   { name: "Ice Cream", emoji: "🍦" },
-  { name: "Plantains", emoji: "🌿" },
+  { name: "Plantains", emoji: "🍌" },
+  { name: "Me (Dara)", emoji: "😏" },
 ];
 
 // ============================================================
@@ -108,7 +109,11 @@ function goToScreen(toId) {
 // SCREEN 1 — INVITATION (NO button flees)
 // ============================================================
 function initScreen1() {
-  document.getElementById("btn-yes").addEventListener("click", () => goToScreen("screen-datetime"));
+  document.getElementById("btn-yes").addEventListener("click", () => {
+    const noBtn = document.getElementById("btn-no");
+    if (noBtn) noBtn.remove();
+    goToScreen("screen-datetime");
+  });
   initNoButton();
 }
 
@@ -285,6 +290,11 @@ function initScreen3() {
     grid.appendChild(label);
   });
 
+  document.getElementById("btn-add-food").addEventListener("click", addCustomFood);
+  document.getElementById("custom-food-input").addEventListener("keydown", e => {
+    if (e.key === "Enter") addCustomFood();
+  });
+
   document.getElementById("btn-confirm-food").addEventListener("click", () => {
     state.selectedFoods = [...document.querySelectorAll("#food-grid input:checked")].map(cb => cb.value);
     state.guestName     = document.getElementById("guest-name").value.trim() || "Baby";
@@ -296,6 +306,53 @@ function initScreen3() {
     goToScreen("screen-confirm");
     setTimeout(triggerConfetti, 350);
   });
+}
+
+function addCustomFood() {
+  const input = document.getElementById("custom-food-input");
+  const name  = input.value.trim();
+  if (!name) return;
+
+  const grid = document.getElementById("food-grid");
+
+  const existing = [...grid.querySelectorAll("input")].find(
+    cb => cb.value.toLowerCase() === name.toLowerCase()
+  );
+  if (existing) {
+    existing.checked = true;
+    document.getElementById("btn-confirm-food").disabled = false;
+    input.value = "";
+    return;
+  }
+
+  const label    = document.createElement("label");
+  label.className = "food-card";
+
+  const cb = document.createElement("input");
+  cb.type    = "checkbox";
+  cb.name    = "food";
+  cb.value   = name;
+  cb.checked = true;
+
+  const emojiSpan = document.createElement("span");
+  emojiSpan.className   = "food-emoji";
+  emojiSpan.textContent = "🍽️";
+
+  const nameSpan = document.createElement("span");
+  nameSpan.className   = "food-name";
+  nameSpan.textContent = name;
+
+  cb.addEventListener("change", () => {
+    document.getElementById("btn-confirm-food").disabled =
+      !grid.querySelector("input:checked");
+  });
+
+  label.append(cb, emojiSpan, nameSpan);
+  grid.appendChild(label);
+
+  document.getElementById("btn-confirm-food").disabled = false;
+  input.value = "";
+  input.focus();
 }
 
 // ============================================================
