@@ -22,6 +22,7 @@ import os
 import smtplib
 import sys
 import time
+import urllib.parse
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -42,38 +43,13 @@ SCRIPT_DIR = Path(__file__).parent
 DEFAULT_CONFIG = SCRIPT_DIR / "config.json"
 RESULTS_CACHE = SCRIPT_DIR / "last_results.json"
 
+# v1 is the most widely verified working endpoint (used by multiple open-source scrapers).
+# v4 is used by teslahunt/inventory but less documented.
+# We try v1 first, then fall back to v4.
 TESLA_API_ENDPOINTS = [
-    "https://www.tesla.com/inventory/api/v4/inventory-results",
     "https://www.tesla.com/inventory/api/v1/inventory-results",
+    "https://www.tesla.com/inventory/api/v4/inventory-results",
 ]
-
-TESLA_BROWSE_URL = "https://www.tesla.com/inventory/used/m3"
-
-HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/126.0.0.0 Safari/537.36"
-    ),
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,application/json,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Connection": "keep-alive",
-    "Sec-Fetch-Dest": "document",
-    "Sec-Fetch-Mode": "navigate",
-    "Sec-Fetch-Site": "none",
-    "Sec-Fetch-User": "?1",
-    "Upgrade-Insecure-Requests": "1",
-}
-
-API_HEADERS = {
-    "Accept": "application/json, text/plain, */*",
-    "Referer": "https://www.tesla.com/inventory/used/m3",
-    "Sec-Fetch-Dest": "empty",
-    "Sec-Fetch-Mode": "cors",
-    "Sec-Fetch-Site": "same-origin",
-    "X-Requested-With": "XMLHttpRequest",
-}
 
 # Shipping cost lookup: (min_miles, max_miles, estimated_cost)
 SHIPPING_TABLE = [
@@ -249,25 +225,8 @@ class GeoLocator:
 # ─── Fetching: API Mode ─────────────────────────────────────────────────────
 
 
-def create_session() -> requests.Session:
-    """Create a session with browser-like properties and get Tesla cookies."""
-    session = requests.Session()
-    session.headers.update(HEADERS)
-
-    try:
-        log.info("Establishing session with Tesla website...")
-        resp = session.get(TESLA_BROWSE_URL, timeout=15, allow_redirects=True)
-        log.info("Session established (status %d, %d cookies)", resp.status_code, len(session.cookies))
-    except requests.RequestException as e:
-        log.warning("Could not establish browser session: %s", e)
-
-    return session
-
-
-def fetch_inventory_api(config: dict) -> list[dict]:
-    """Fetch used Model 3 inventory via Tesla's JSON API."""
-    session = create_session()
-
+def _build_query_json(config: dict, offset: int, count: int, outside: bool) -> str:
+    """Build the JSON query string matching Tesla's expected format."""
     query_obj = {
         "query": {
             "model": "m3",
@@ -283,12 +242,27 @@ def fetch_inventory_api(config: dict) -> list[dict]:
             "zip": config["zip_code"],
             "range": config.get("search_radius_miles", 0),
         },
-        "offset": 0,
-        "count": 50,
-        "outsideOffset": 0,
-        "outsideSearch": True,
+        "offset": offset,
+        "count": count,
+        "outsideOffset": offset,
+        "outsideSearch": outside,
     }
+    return json.dumps(query_obj)
 
+
+def fetch_inventory_api(config: dict) -> list[dict]:
+    """
+    Fetch used Model 3 inventory via Tesla's JSON API.
+
+    Uses direct URL construction with urllib.parse.quote (matching verified
+    working open-source scrapers) rather than requests' params= encoding,
+    which can double-encode the JSON query string.
+
+    Verified against:
+    - github.com/kaedenbrinkman/tesla-inventory (Python, v1)
+    - github.com/stephenlindauer/tesla-used-inventory-monitor (JS, v1)
+    - github.com/teslahunt/inventory (JS, v4)
+    """
     all_results = []
     page_size = 50
     max_pages = 20
@@ -298,18 +272,13 @@ def fetch_inventory_api(config: dict) -> list[dict]:
         all_results = []
 
         for page in range(max_pages):
-            query_obj["offset"] = page * page_size
-            query_obj["count"] = page_size
-
-            req_headers = {**HEADERS, **API_HEADERS}
+            query_json = _build_query_json(
+                config, offset=page * page_size, count=page_size, outside=True
+            )
+            full_url = endpoint + "?query=" + urllib.parse.quote(query_json)
 
             try:
-                resp = session.get(
-                    endpoint,
-                    params={"query": json.dumps(query_obj)},
-                    headers=req_headers,
-                    timeout=30,
-                )
+                resp = requests.get(full_url, timeout=30)
                 if resp.status_code == 403:
                     log.warning("403 Forbidden on %s — trying next endpoint", endpoint)
                     all_results = []
@@ -330,7 +299,9 @@ def fetch_inventory_api(config: dict) -> list[dict]:
                 break
 
             all_results.extend(results)
-            total = data.get("total_matches_found", len(all_results))
+
+            total_raw = data.get("total_matches_found", len(all_results))
+            total = int(total_raw) if isinstance(total_raw, str) else total_raw
 
             if (page + 1) * page_size >= total:
                 break
@@ -495,38 +466,29 @@ def _parse_card_text(lines: list[str]) -> Optional[dict]:
 
 
 def parse_vehicle(raw: dict) -> dict:
-    """Normalize a raw Tesla API vehicle record."""
-    odometer = (
-        raw.get("Odometer")
-        or raw.get("odometer")
-        or raw.get("OdometerValue")
-        or raw.get("Miles")
-        or raw.get("miles")
-        or 0
-    )
+    """
+    Normalize a raw Tesla API vehicle record.
 
-    price = (
-        raw.get("Price")
-        or raw.get("price")
-        or raw.get("PurchasePrice")
-        or raw.get("purchasePrice")
-        or raw.get("TotalPrice")
-        or 0
-    )
+    Field names verified against real API response (123+ fields per vehicle):
+      github.com/kaedenbrinkman/tesla-inventory - Price, VIN, Model, TrimName, Odometer, MetroName
+      gist.github.com/myhalici/2241ae06ca4f8069290cd63c3b114542 - full field inventory
+    """
+    odometer = raw.get("Odometer") or raw.get("Mileage") or 0
+    price = raw.get("Price") or raw.get("PurchasePrice") or raw.get("TotalPrice") or 0
+    year = raw.get("Year") or 0
+    vin = raw.get("VIN") or "Unknown"
 
-    year = raw.get("Year") or raw.get("year") or 0
-    vin = raw.get("VIN") or raw.get("vin") or "Unknown"
-
-    trim = raw.get("TrimName") or raw.get("trim") or "Unknown"
+    trim = raw.get("TrimName") or "Unknown"
     if isinstance(trim, list):
         trim = trim[0] if trim else "Unknown"
     raw_trim = raw.get("TRIM")
     if trim == "Unknown" and isinstance(raw_trim, list) and raw_trim:
         trim = raw_trim[0]
 
-    city = raw.get("City") or raw.get("city") or ""
-    state = raw.get("StateProvince") or raw.get("state") or raw.get("StateCode") or ""
-    zip_code = raw.get("PostalCode") or raw.get("zip") or ""
+    city = raw.get("City") or ""
+    state = raw.get("StateProvince") or ""
+    metro = raw.get("MetroName") or ""
+    zip_code = raw.get("PostalCode") or ""
 
     color = raw.get("PAINT", ["Unknown"])
     if isinstance(color, list):
@@ -536,30 +498,46 @@ def parse_vehicle(raw: dict) -> dict:
     if isinstance(interior, list):
         interior = interior[0] if interior else "Unknown"
 
-    vehicle_history = raw.get("VehicleHistory") or raw.get("vehicleHistory") or ""
-    title_status = raw.get("TitleStatus") or raw.get("titleStatus") or ""
-    damage_disclosure = raw.get("DamageDisclosure") or raw.get("damageDisclosure") or ""
+    # Repair detection: verified fields from real API responses
+    vehicle_history = raw.get("VehicleHistory") or ""
+    title_status = raw.get("TitleStatus") or ""
+    title_subtype = raw.get("TitleSubtype") or ""
+    damage_disclosure = raw.get("DamageDisclosure") or ""
+    damage_status = raw.get("DamageDisclosureStatus") or ""
+    cpo_status = raw.get("CPORefurbishmentStatus") or ""
+    has_damage_photos = raw.get("HasDamagePhotos", False)
 
-    is_repaired = False
+    is_repaired = bool(has_damage_photos)
     repair_indicators = [
-        "previously repaired", "repaired", "damage", "accident", "rebuilt", "salvage",
+        "previously repaired", "repaired", "damage", "accident",
+        "rebuilt", "salvage", "refurbish",
     ]
-    for field_val in [vehicle_history, title_status, damage_disclosure]:
+    for field_val in [vehicle_history, title_status, title_subtype,
+                      damage_disclosure, damage_status, cpo_status]:
         if isinstance(field_val, str) and any(
             ind in field_val.lower() for ind in repair_indicators
         ):
             is_repaired = True
             break
 
-    transport_fee = (
-        raw.get("TransportationFee")
-        or raw.get("transportFee")
-        or raw.get("TransportFee")
-        or raw.get("InventoryTransportFee")
-    )
+    # Transport fee: verified field name from real API response
+    transport_fee = raw.get("TransportationFee")
+    if transport_fee is None:
+        transport_fees = raw.get("TransportFees")
+        if isinstance(transport_fees, dict):
+            transport_fee = transport_fees.get("total") or transport_fees.get("amount")
 
-    car_lat = raw.get("Latitude") or raw.get("latitude")
-    car_lng = raw.get("Longitude") or raw.get("longitude")
+    # Location: use geoPoints if lat/lng not available directly
+    car_lat = raw.get("Latitude")
+    car_lng = raw.get("Longitude")
+    if car_lat is None:
+        geo_points = raw.get("geoPoints")
+        if isinstance(geo_points, list) and geo_points:
+            pt = geo_points[0] if isinstance(geo_points[0], dict) else {}
+            car_lat = pt.get("lat") or pt.get("latitude")
+            car_lng = pt.get("lng") or pt.get("longitude")
+
+    location_str = metro or (f"{city}, {state}" if city else state)
 
     return {
         "vin": vin,
@@ -571,6 +549,8 @@ def parse_vehicle(raw: dict) -> dict:
         "interior": interior,
         "city": city,
         "state": state,
+        "metro": metro,
+        "location_str": location_str,
         "zip_code": zip_code,
         "lat": float(car_lat) if car_lat else None,
         "lng": float(car_lng) if car_lng else None,
@@ -717,7 +697,7 @@ def format_results(vehicles: list[dict], title: str = None) -> str:
             f"{v['mileage']:,}",
             f"${v['shipping_cost']:,}",
             f"${v['total_cost']:,}",
-            f"{v['city']}, {v['state']}{repair_flag}",
+            f"{v['location_str']}{repair_flag}",
         ])
 
     output += tabulate(
@@ -739,7 +719,7 @@ def format_results(vehicles: list[dict], title: str = None) -> str:
             f"  Shipping: ${v['shipping_cost']:,} ({v['shipping_source']})\n"
             f"  Total Cost: ${v['total_cost']:,}\n"
             f"  Color: {v['color']}  |  Interior: {v['interior']}\n"
-            f"  Location: {v['city']}, {v['state']}  |  Distance: {v['distance']} mi\n"
+            f"  Location: {v['location_str']}  |  Distance: {v['distance']} mi\n"
             f"  Repaired: {'YES' if v['is_repaired'] else 'No'}"
             f"{'  (' + v['vehicle_history'] + ')' if v['is_repaired'] and v['vehicle_history'] else ''}\n"
             f"  VIN: {v['vin']}\n"
