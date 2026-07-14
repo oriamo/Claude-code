@@ -1,0 +1,32 @@
+2026-06-21 09:39:01 [INFO] Scheduled run — waiting 46 min 49 sec before scan
+2026-06-21 16:36:41 [INFO] Criteria: 2022-2023 Model 3 | < 60k mi | <= $22,000 | ZIP 20781
+2026-06-21 16:36:42 [INFO] Notification sent to 2404133888@tmomail.net
+2026-06-21 16:36:42 [INFO] Notification sent to dara.1440p@gmail.com
+2026-06-21 16:36:43 [INFO] Opening Chrome (undetected mode)...
+2026-06-21 16:36:43 [INFO] patching driver executable /Users/oluwadarasimiadewumi/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2026-06-21 16:36:49 [INFO] Warming up on tesla.com homepage...
+2026-06-21 16:37:01 [INFO] Navigating to: https://www.tesla.com/inventory/used/m3?arrangeby=plh&zip=20781&range=0
+2026-06-21 16:37:02 [INFO] Waiting for page to load...
+2026-06-21 16:37:08 [INFO] Dismissing cookie popup: Accept
+2026-06-21 16:37:11 [INFO] Opening delivery popup (ZIP=20721, range=All Deliverable)...
+2026-06-21 16:37:20 [INFO] Typed delivery ZIP = 20721
+2026-06-21 16:37:21 [INFO] Set range = All Deliverable (found: True)
+2026-06-21 16:38:04 [INFO] Submitted popup via Enter
+2026-06-21 16:38:06 [INFO] Delivery popup dismissed
+2026-06-21 16:38:08 [INFO] Applying year filter (2022–2023)...
+2026-06-21 16:38:08 [INFO] Set inputMin-Year = 2022 (found: True)
+2026-06-21 16:38:11 [INFO] Set inputMax-Year = 2023 (found: True)
+2026-06-21 16:38:14 [INFO] Waiting for filtered results to load...
+2026-06-21 16:38:19 [INFO] Scrolling to load all paginated results...
+2026-06-21 16:38:24 [INFO]   scroll 1: 48 cards loaded
+2026-06-21 16:38:28 [INFO]   scroll 2: 72 cards loaded
+2026-06-21 16:38:32 [INFO]   scroll 3: 96 cards loaded
+2026-06-21 16:38:37 [INFO] No new cards after scroll 3 — end of results (96 total)
+2026-06-21 16:38:39 [INFO] Page title: 'New & Pre-Owned Electric Cars | Tesla'
+2026-06-21 16:38:39 [INFO] Scraping vehicle cards from page DOM...
+2026-06-21 16:38:39 [INFO] Scraped 96 vehicle cards from page
+2026-06-21 16:38:39 [INFO] Years: [2022, 2023] | Price range: $23,400 – $26,800
+2026-06-21 16:38:39 [INFO] Stored 96 vehicles to database (scan_date=2026-06-21)
+2026-06-21 16:38:39 [INFO] Filtered to 0 vehicles (year 2022-2023, price <= $22,000, mileage < 60k)
+2026-06-21 16:38:39 [INFO] Scan complete. No matches yet — 96 vehicles checked.
+2026-06-21 16:38:39 [INFO] ensuring close

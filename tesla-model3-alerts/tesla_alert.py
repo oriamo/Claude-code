@@ -250,6 +250,53 @@ def _build_query_json(config: dict, offset: int, count: int, outside: bool) -> s
     return json.dumps(query_obj)
 
 
+BROWSER_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/126.0.0.0 Safari/537.36"
+    ),
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Referer": "https://www.tesla.com/inventory/used/m3",
+    "Origin": "https://www.tesla.com",
+    "Connection": "keep-alive",
+    "Sec-Fetch-Dest": "empty",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Site": "same-origin",
+    "Sec-Ch-Ua": '"Not/A)Brand";v="8", "Chromium";v="126", "Google Chrome";v="126"',
+    "Sec-Ch-Ua-Mobile": "?0",
+    "Sec-Ch-Ua-Platform": '"macOS"',
+}
+
+
+def _make_session(config: dict) -> requests.Session:
+    """
+    Create a session that mimics a real browser visit.
+    Hitting the inventory page first lets Tesla's CDN set cookies/challenge
+    tokens so subsequent API calls aren't blocked with 403.
+    """
+    session = requests.Session()
+    session.headers.update(BROWSER_HEADERS)
+    zip_code = config.get("zip_code", "20721")
+    # Visit homepage first, then used cars, then inventory — same referrer chain
+    # a human browser would produce. Akamai tracks referrer depth.
+    seed_pages = [
+        "https://www.tesla.com/",
+        "https://www.tesla.com/used",
+        f"https://www.tesla.com/inventory/used/m3?arrangeby=plh&zip={zip_code}&range=0",
+    ]
+    try:
+        for seed_url in seed_pages:
+            log.info("Seeding session: %s", seed_url)
+            session.get(seed_url, timeout=15)
+            time.sleep(2)
+    except requests.RequestException as e:
+        log.warning("Session seed request failed (will try anyway): %s", e)
+    return session
+
+
 def fetch_inventory_api(config: dict) -> list[dict]:
     """
     Fetch used Model 3 inventory via Tesla's JSON API.
@@ -267,6 +314,8 @@ def fetch_inventory_api(config: dict) -> list[dict]:
     page_size = 50
     max_pages = 20
 
+    session = _make_session(config)
+
     for endpoint in TESLA_API_ENDPOINTS:
         log.info("Trying endpoint: %s", endpoint)
         all_results = []
@@ -278,9 +327,13 @@ def fetch_inventory_api(config: dict) -> list[dict]:
             full_url = endpoint + "?query=" + urllib.parse.quote(query_json)
 
             try:
-                resp = requests.get(full_url, timeout=30)
+                resp = session.get(full_url, timeout=30)
                 if resp.status_code == 403:
-                    log.warning("403 Forbidden on %s — trying next endpoint", endpoint)
+                    log.warning(
+                        "403 Forbidden on %s (status: %d) — trying next endpoint",
+                        endpoint, resp.status_code,
+                    )
+                    log.debug("Response body: %s", resp.text[:500])
                     all_results = []
                     break
                 resp.raise_for_status()
@@ -290,7 +343,7 @@ def fetch_inventory_api(config: dict) -> list[dict]:
                 all_results = []
                 break
             except json.JSONDecodeError:
-                log.error("Invalid JSON response")
+                log.error("Invalid JSON response: %s", resp.text[:200])
                 all_results = []
                 break
 
@@ -324,44 +377,51 @@ def fetch_inventory_selenium(config: dict) -> list[dict]:
     try:
         from selenium import webdriver
         from selenium.webdriver.chrome.options import Options
-        from selenium.webdriver.chrome.service import Service
         from selenium.webdriver.common.by import By
         from selenium.webdriver.support import expected_conditions as EC
         from selenium.webdriver.support.ui import WebDriverWait
     except ImportError:
-        log.error(
-            "Selenium not installed. Install with: pip install selenium\n"
-            "Also install ChromeDriver: https://chromedriver.chromium.org/downloads"
-        )
+        log.error("Selenium not installed. Run: pip install selenium")
         return []
 
     zip_code = config["zip_code"]
-    url = (
+    inventory_url = (
         f"https://www.tesla.com/inventory/used/m3"
         f"?arrangeby=plh&zip={zip_code}&range=0"
     )
 
-    log.info("Launching headless Chrome for %s", url)
-
+    # Run as a real visible browser — headless triggers Akamai's bot detection.
     chrome_opts = Options()
-    chrome_opts.add_argument("--headless=new")
     chrome_opts.add_argument("--no-sandbox")
     chrome_opts.add_argument("--disable-dev-shm-usage")
-    chrome_opts.add_argument("--disable-gpu")
     chrome_opts.add_argument("--window-size=1920,1080")
-    chrome_opts.add_argument(
-        "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
-    )
+    chrome_opts.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_opts.add_experimental_option("excludeSwitches", ["enable-automation"])
+    chrome_opts.add_experimental_option("useAutomationExtension", False)
     chrome_opts.set_capability("goog:loggingPrefs", {"performance": "ALL"})
+
+    log.info("Launching Chrome browser (visible window required to pass bot check)...")
 
     driver = None
     try:
         driver = webdriver.Chrome(options=chrome_opts)
-        driver.get(url)
+        driver.execute_cdp_cmd(
+            "Page.addScriptToEvaluateOnNewDocument",
+            {"source": "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"},
+        )
 
-        WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "[class*='result'], [class*='inventory'], [class*='card']"))
+        # Browse like a human: homepage → used cars → inventory
+        log.info("Visiting tesla.com homepage first...")
+        driver.get("https://www.tesla.com/")
+        time.sleep(3)
+
+        log.info("Navigating to used inventory...")
+        driver.get(inventory_url)
+
+        WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, "[class*='result'], [class*='inventory'], [class*='card'], article")
+            )
         )
         time.sleep(5)
 
@@ -751,7 +811,7 @@ def send_email(subject: str, body: str, config: dict):
     try:
         with smtplib.SMTP(email_cfg["smtp_server"], email_cfg["smtp_port"]) as server:
             server.starttls()
-            server.login(email_cfg["sender_email"], email_cfg["sender_app_password"])
+            server.login(email_cfg["sender_email"], email_cfg["sender_app_password"].replace(" ", ""))
             server.sendmail(
                 email_cfg["sender_email"],
                 email_cfg["recipient_email"],

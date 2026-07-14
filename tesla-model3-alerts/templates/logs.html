@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Run Logs — Tesla Tracker{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center mb-3 gap-2">
+  <h5 class="mb-0 fw-semibold"><i class="bi bi-terminal me-1"></i> Run Logs</h5>
+  <span class="badge bg-secondary ms-1">{{ sessions | length }} session{% if sessions | length != 1 %}s{% endif %}</span>
+</div>
+
+{% if not sessions %}
+<div class="card p-5 text-center text-muted">
+  <i class="bi bi-file-earmark-text" style="font-size:3rem;"></i>
+  <p class="mt-3">No log file found at <code>browse.log</code>.</p>
+</div>
+{% else %}
+{% for s in sessions %}
+<div class="card mb-3">
+  <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-2">
+      {% if s.status == 'success' %}
+        <span class="badge bg-success">Success</span>
+      {% elif s.status == 'blocked' %}
+        <span class="badge bg-warning text-dark">Blocked — Access Denied</span>
+      {% elif s.status == 'error' %}
+        <span class="badge bg-danger">Error</span>
+      {% else %}
+        <span class="badge bg-secondary">Unknown</span>
+      {% endif %}
+      <span class="font-monospace" style="font-size:.88rem;">{{ s.start_time }}</span>
+    </div>
+    <div class="d-flex gap-3 text-muted" style="font-size:.82rem;">
+      {% if s.vehicles_stored %}
+        <span><i class="bi bi-car-front me-1"></i>{{ s.vehicles_stored }} listings</span>
+      {% endif %}
+      {% if s.price_range != '—' %}
+        <span><i class="bi bi-tag me-1"></i>{{ s.price_range }}</span>
+      {% endif %}
+      {% if s.matches %}
+        <span class="text-danger fw-semibold"><i class="bi bi-bell-fill me-1"></i>{{ s.matches }} match{% if s.matches != 1 %}es{% endif %}!</span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <pre class="mb-0 p-3" style="background:#0d1117; font-size:.78rem; line-height:1.6; max-height:400px; overflow-y:auto; border-radius:0 0 .375rem .375rem;">{% for line in s.lines %}<span class="{% if '[ERROR]' in line or '[WARNING]' in line %}text-warning{% elif 'MATCH' in line or 'new deal' in line %}text-danger fw-bold{% elif 'Stored' in line or 'sent' in line.lower() %}text-success{% elif 'Access Denied' in line or 'Blocked' in line %}text-warning{% else %}text-secondary{% endif %}">{{ line }}</span>
+{% endfor %}</pre>
+  </div>
+</div>
+{% endfor %}
+{% endif %}
+{% endblock %}

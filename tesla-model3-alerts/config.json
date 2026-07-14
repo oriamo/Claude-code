@@ -1,5 +1,6 @@
 {
-  "zip_code": "20721",
+  "zip_code": "20781",
+  "delivery_zip": "20721",
   "lat": 38.9597,
   "lng": -76.7286,
   "max_price": 22000,
@@ -18,12 +19,16 @@
   },
 
   "email_notifications": {
-    "enabled": false,
+    "enabled": true,
     "smtp_server": "smtp.gmail.com",
     "smtp_port": 587,
-    "sender_email": "",
-    "sender_app_password": "",
-    "recipient_email": ""
+    "sender_email": "adewoledarasimi25@gmail.com",
+    "sender_app_password": "ttqy xqep omzr irvs",
+    "recipient_email": "2404133888@tmomail.net",
+    "notification_recipients": [
+      "2404133888@tmomail.net",
+      "dara.1440p@gmail.com"
+    ]
   },
 
   "schedule": {

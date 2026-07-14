@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% block title %}{{ vehicle.year }} {{ vehicle.trim }} ({{ vehicle.vin }}) — Tesla Tracker{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="/listings" class="text-decoration-none">All Listings</a></li>
+    <li class="breadcrumb-item active font-monospace" style="font-size:.9rem;">{{ vehicle.vin }}</li>
+  </ol>
+</nav>
+
+<div class="row g-3 mb-4">
+  <!-- Hero card -->
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+        <span>{{ vehicle.year }} Tesla Model 3 {{ vehicle.trim }}</span>
+        {% if vehicle.url %}
+          <a href="{{ vehicle.url }}" target="_blank" class="btn btn-sm btn-outline-danger py-0">
+            View on Tesla <i class="bi bi-box-arrow-up-right ms-1"></i>
+          </a>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <dl class="row mb-0" style="font-size:.9rem;">
+          <dt class="col-5 text-muted">VIN</dt>
+          <dd class="col-7 font-monospace">{{ vehicle.vin }}</dd>
+
+          <dt class="col-5 text-muted">Color</dt>
+          <dd class="col-7">{{ vehicle.color or '—' }}</dd>
+
+          <dt class="col-5 text-muted">Interior</dt>
+          <dd class="col-7">{{ vehicle.interior or '—' }}</dd>
+
+          <dt class="col-5 text-muted">Location</dt>
+          <dd class="col-7">{{ vehicle.location_str or '—' }}</dd>
+
+          <dt class="col-5 text-muted">Title</dt>
+          <dd class="col-7">{{ vehicle.title_status or 'Unknown' }}</dd>
+
+          <dt class="col-5 text-muted">Repair history</dt>
+          <dd class="col-7">
+            {% if vehicle.is_repaired %}
+              <span class="badge repaired-badge">Previously repaired</span>
+            {% else %}
+              <span class="text-muted">None on record</span>
+            {% endif %}
+          </dd>
+
+          <dt class="col-5 text-muted">First seen</dt>
+          <dd class="col-7 font-monospace">{{ vehicle.first_seen_date or '—' }}</dd>
+
+          <dt class="col-5 text-muted">Last seen</dt>
+          <dd class="col-7 font-monospace">{{ vehicle.last_seen_date or '—' }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <!-- Options / badges -->
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-header fw-semibold"><i class="bi bi-toggles me-1"></i> Options & Features</div>
+      <div class="card-body">
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          {% if vehicle.fsd %}
+            <span class="badge badge-fsd fs-6 py-2 px-3">
+              <i class="bi bi-cpu me-1"></i> {{ vehicle.fsd }}
+            </span>
+          {% endif %}
+          {% if vehicle.supercharging %}
+            <span class="badge badge-sc fs-6 py-2 px-3">
+              <i class="bi bi-lightning-charge me-1"></i> {{ vehicle.supercharging }}
+            </span>
+          {% endif %}
+          {% if vehicle.autopilot %}
+            <span class="badge badge-ap fs-6 py-2 px-3">
+              <i class="bi bi-robot me-1"></i> {{ vehicle.autopilot }}
+            </span>
+          {% endif %}
+          {% if vehicle.wheel_type %}
+            <span class="badge bg-secondary fs-6 py-2 px-3">
+              <i class="bi bi-circle me-1"></i> {{ vehicle.wheel_type }}
+            </span>
+          {% endif %}
+          {% if not vehicle.fsd and not vehicle.supercharging and not vehicle.autopilot and not vehicle.wheel_type %}
+            <span class="text-muted">No option data captured yet</span>
+          {% endif %}
+        </div>
+
+        {% if vehicle.options_list %}
+          <p class="text-muted mb-1" style="font-size:.8rem; text-transform:uppercase; letter-spacing:.5px;">All detected options</p>
+          <div class="d-flex flex-wrap gap-1">
+            {% for opt in vehicle.options_list %}
+              <span class="badge bg-dark border border-secondary text-light" style="font-size:.78rem;">{{ opt }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Price history chart -->
+{% if history %}
+<div class="card mb-3">
+  <div class="card-header fw-semibold">
+    <i class="bi bi-graph-down-arrow me-1"></i> Price History
+  </div>
+  <div class="card-body">
+    <canvas id="priceChart" height="80"></canvas>
+  </div>
+</div>
+
+<!-- Price history table -->
+<div class="card">
+  <div class="card-header fw-semibold">
+    <i class="bi bi-table me-1"></i> Scan-by-Scan Data
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle" style="font-size:.88rem;">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Price</th>
+            <th>Mileage</th>
+            <th>Shipping</th>
+            <th>Total</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for h in history | reverse %}
+          <tr>
+            <td class="font-monospace">
+              {{ h.scan_date }}
+              {% if h.scan_time and h.scan_time != '00:00:00' %}
+                <br><small class="text-muted">{{ h.scan_time[:5] }}</small>
+              {% endif %}
+            </td>
+            <td class="price-tag">{% if h.price %}${{ "{:,}".format(h.price) }}{% else %}—{% endif %}</td>
+            <td>{% if h.mileage %}{{ "{:,}".format(h.mileage) }} mi{% else %}—{% endif %}</td>
+            <td>{% if h.shipping_cost %}${{ "{:,}".format(h.shipping_cost) }}{% else %}—{% endif %}</td>
+            <td>{% if h.total_cost %}${{ "{:,}".format(h.total_cost) }}{% else %}—{% endif %}</td>
+            <td>{% if h.score %}<span class="badge bg-secondary">{{ "%.1f"|format(h.score) }}</span>{% else %}—{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="card p-4 text-center text-muted">
+  <i class="bi bi-clock-history" style="font-size:2rem;"></i>
+  <p class="mt-2 mb-0">No price history yet — will appear after the next scan.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if history %}
+<script>
+const labels = [{% for h in history %}"{{ h.scan_date }}{% if h.scan_time and h.scan_time != '00:00:00' %} {{ h.scan_time[:5] }}{% endif %}"{% if not loop.last %},{% endif %}{% endfor %}];
+const prices = {{ history | map(attribute='price') | list | tojson }};
+const totals = {{ history | map(attribute='total_cost') | list | tojson }};
+
+new Chart(document.getElementById('priceChart'), {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [
+      {
+        label: 'List Price',
+        data: prices,
+        borderColor: '#3fb950',
+        backgroundColor: 'rgba(63,185,80,.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        borderWidth: 2,
+      },
+      {
+        label: 'Total w/ Shipping',
+        data: totals,
+        borderColor: '#58a6ff',
+        backgroundColor: 'transparent',
+        tension: 0.3,
+        pointRadius: 4,
+        borderWidth: 2,
+        borderDash: [5, 3],
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color: '#8b949e' } } },
+    scales: {
+      x: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+      y: {
+        ticks: { color: '#8b949e', callback: v => '$' + v.toLocaleString() },
+        grid: { color: '#21262d' }
+      }
+    }
+  }
+});
+</script>
+{% endif %}
+{% endblock %}

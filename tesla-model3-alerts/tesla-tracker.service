@@ -1,0 +1,13 @@
+[Unit]
+Description=Tesla Model 3 Tracker Web App
+After=network.target
+
+[Service]
+User=oadewumi
+WorkingDirectory=/home/oadewumi/tesla-alert
+ExecStart=/home/oadewumi/tesla-alert/venv/bin/python web_app.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
