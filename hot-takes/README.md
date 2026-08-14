@@ -4,7 +4,7 @@ An animated presentation site built from `hot_takes.pptx`. Same argument, same
 tone, same palette (ink `#121212` · gold `#C9A227` · blood `#B4231E`, Cambria +
 Calibri) — just things a slide deck physically can't do.
 
-**Live:** https://oriamo.github.io/claude-code/ *(after the one-time Pages setup below)*
+**Live:** https://oriamo.github.io/Claude-code/ *(after the one-time Pages setup below)*
 
 ---
 
@@ -72,7 +72,7 @@ to GitHub Pages on every push. It needs the Pages source flipped to Actions once
 1. Repo **Settings → Pages**
 2. **Build and deployment → Source:** select **GitHub Actions**
 3. Done — the next push (or **Actions → Deploy Hot Takes site → Run workflow**)
-   publishes to `https://oriamo.github.io/claude-code/`
+   publishes to `https://oriamo.github.io/Claude-code/`
 
 ## Running locally
 
@@ -94,7 +94,7 @@ hot-takes/
 ├── index.html          all 14 slides
 ├── css/styles.css      palette, layout, every animation
 ├── js/app.js           navigation, counters, vote game, notes, overview
-└── assets/             exhibit-a.png, exhibit-b.png, birkin.png
+└── assets/             exhibit-a.png, exhibit-b.png
 ```
 
 Respects `prefers-reduced-motion` (animations collapse, content stays) and prints
