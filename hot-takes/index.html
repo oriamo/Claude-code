@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Designer Products Are A Scam — Hot Takes</title>
+<meta name="description" content="A debate based on fact. Presented by Oluwadarasimi &quot;Dara&quot; Adewumi.">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ── ambient texture layers ───────────────────────────────── -->
+<div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+<canvas id="dust" class="dust" aria-hidden="true"></canvas>
+
+<!-- ── progress + chrome ────────────────────────────────────── -->
+<div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
+
+<header class="hud" aria-hidden="true">
+  <span class="hud-mark">HOT&nbsp;TAKES</span>
+  <span class="hud-dot"></span>
+  <span class="hud-slide"><b id="slideNum">01</b>&thinsp;/&thinsp;14</span>
+</header>
+
+<button class="hud-help" id="helpBtn" title="Keyboard shortcuts (press ?)">?</button>
+
+<div class="blackout" id="blackout" aria-hidden="true"></div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<main id="deck" class="deck">
+
+<!-- ─────────────── 01 · TITLE ─────────────── -->
+<section class="slide slide--title" data-notes="Open cold. Do not warm them up. Say: 'By the end of this, you will not be able to defend a single purchase you made last year.' Then go straight to slide 2 and make them play.">
+  <div class="tags" aria-hidden="true"></div>
+  <div class="wrap wrap--title">
+    <p class="kicker r" data-r="1">A DEBATE BASED ON FACT</p>
+
+    <h1 class="title-stack">
+      <span class="tl-1 r" data-r="2">DESIGNER</span>
+      <span class="tl-2 r" data-r="3">PRODUCTS</span>
+      <span class="tl-3">
+        <span class="r" data-r="4">ARE&nbsp;A</span>
+        <span class="stamp" data-r="5">SCAM<i class="stamp-slash"></i></span>
+      </span>
+    </h1>
+
+    <p class="deck-sub r" data-r="6">
+      You are not buying a product. You are renting other people&rsquo;s assumptions
+      &mdash; and paying <em>retail</em> for the privilege.
+    </p>
+
+    <div class="byline r" data-r="7">
+      <span class="byline-rule"></span>
+      Oluwadarasimi &ldquo;Dara&rdquo; Adewumi
+    </div>
+
+    <ul class="bonus-strip r" data-r="8">
+      <li><b>Bonus takes:</b></li>
+      <li>Women lead men on just for vibes &mdash; all na free dinner</li>
+      <li>Men shouldn&rsquo;t date women outside their financial class? <i>kilofeel</i></li>
+      <li>Most of your music taste is trash</li>
+    </ul>
+  </div>
+  <div class="scroll-cue r" data-r="9" aria-hidden="true">press <kbd>&rarr;</kbd> to begin</div>
+</section>
+
+<!-- ─────────────── 02 · THE GAME ─────────────── -->
+<section class="slide slide--game" data-notes="SETUP: swap in two photos of the SAME model — one authentic, one high-quality replica (edit assets/exhibit-a.png and exhibit-b.png, or click the ⇄ button to load your own). Make everyone commit OUT LOUD before you tally. Press R to reveal. The line is: 'Half of you got it wrong. So what exactly did the extra $3,000 buy?'">
+  <div class="wrap">
+    <p class="eyebrow r" data-r="1">OPENING GAME &mdash; EVERYONE PLAYS</p>
+    <h2 class="h2 r" data-r="2">This is just pure madness.</h2>
+    <p class="lede r" data-r="3">One of these is authentic. One cost 3% of the price.
+      Hands up &mdash; no talking. <b>Commit out loud</b> before I reveal it.</p>
+
+    <div class="game" id="game">
+      <figure class="card-vote r" data-r="4" data-choice="A">
+        <div class="card-shell">
+          <div class="card-glow"></div>
+          <img src="assets/exhibit-a.png" alt="Exhibit A — a designer handbag" data-swap>
+          <figcaption class="card-cap">EXHIBIT&nbsp;A</figcaption>
+          <div class="verdict verdict--real"><span>AUTHENTIC</span><small>$31,000</small></div>
+        </div>
+        <button class="vote-btn" type="button">
+          <span class="vote-key">A</span> Vote A
+          <b class="vote-count" data-count>0</b>
+        </button>
+      </figure>
+
+      <div class="game-mid" aria-hidden="true">
+        <div class="vs">VS</div>
+        <div class="split-meter"><i id="splitA"></i><i id="splitB"></i></div>
+        <div class="split-label" id="splitLabel">no votes yet</div>
+      </div>
+
+      <figure class="card-vote r" data-r="5" data-choice="B">
+        <div class="card-shell">
+          <div class="card-glow"></div>
+          <img src="assets/exhibit-b.png" alt="Exhibit B — designer footwear" data-swap>
+          <figcaption class="card-cap">EXHIBIT&nbsp;B</figcaption>
+          <div class="verdict verdict--fake"><span>3% OF THE PRICE</span><small>$5,000</small></div>
+        </div>
+        <button class="vote-btn" type="button">
+          <span class="vote-key">B</span> Vote B
+          <b class="vote-count" data-count>0</b>
+        </button>
+      </figure>
+    </div>
+
+    <div class="game-bar r" data-r="6">
+      <p class="game-quips">
+        <span>&ldquo;$31k? For <i>this</i>? Are we okay?&rdquo;</span>
+        <span>&ldquo;Why in God&rsquo;s name is this $5k?&rdquo;</span>
+        <span>Some people will <b>justify</b> paying more because there is red paint on the bottom of their shoe.</span>
+      </p>
+      <div class="game-ctl">
+        <button class="btn" id="revealBtn" type="button">Reveal <kbd>R</kbd></button>
+        <button class="btn btn--ghost" id="resetBtn" type="button">Reset</button>
+        <label class="btn btn--ghost" title="Load your own images">&#8646; Swap photos
+          <input type="file" id="swapInput" accept="image/*" multiple hidden>
+        </label>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── 03 · THESIS ─────────────── -->
+<section class="slide slide--thesis" data-notes="Pause here. Let it sit for three seconds before moving on. This is your thesis in one line.">
+  <div class="wrap wrap--center">
+    <p class="eyebrow r" data-r="1">SO WHAT DID YOU ACTUALLY PAY FOR?</p>
+    <p class="thesis" data-split>Most people buy designer not because it adds anything to their life &mdash; but because they want to <em>feel among</em>.</p>
+    <p class="thesis-tag r" data-r="9">
+      <span class="note-ico" aria-hidden="true">&#9834;</span>
+      Alexa, play <i>Money Can&rsquo;t Buy Happiness</i> by Asake
+    </p>
+  </div>
+</section>
+
+<!-- ─────────────── 04 · THE DOUBLE STANDARD ─────────────── -->
+<section class="slide slide--standard" data-notes="Frame this as structural, not scolding. 'We were handed a rigged menu.' Blame the system, then the brands.">
+  <div class="wrap">
+    <p class="eyebrow r" data-r="1">THE DOUBLE STANDARD</p>
+    <h2 class="h2 r" data-r="2">Same purchase. Two verdicts.</h2>
+
+    <div class="seesaw">
+      <div class="pan pan--l">
+        <div class="pan-who">SHE buys designer</div>
+        <div class="pan-verdict">&ldquo;iconic&rdquo;</div>
+      </div>
+      <div class="fulcrum" aria-hidden="true"><i></i></div>
+      <div class="pan pan--r">
+        <div class="pan-who">HE buys designer</div>
+        <div class="pan-verdict pan-verdict--bad">&ldquo;too flashy&rdquo;</div>
+      </div>
+    </div>
+    <p class="aside r" data-r="4">(For the record: I don&rsquo;t think <em>anybody</em> should be doing it. But pick a lane.)</p>
+
+    <div class="rigged r" data-r="5">
+      <div class="pyramid" aria-hidden="true">
+        <div class="pyr pyr--top"><span>OWNERS &amp; EXECUTIVES</span><b>mostly men</b></div>
+        <div class="pyr pyr--mid"><span>DESIGN STUDENTS</span><b>mostly women</b></div>
+        <div class="pyr pyr--base"><span>CONSUMERS &amp; GARMENT WORKERS</span><b>overwhelmingly women</b></div>
+      </div>
+      <blockquote class="pull">
+        &ldquo;Despite the fact that women make up the majority of fashion consumers,
+        design students, and garment workers, the top ownership and executive roles
+        are overwhelmingly held by men.&rdquo;
+        <cite>Wake up, people &mdash; the game is rigged.</cite>
+      </blockquote>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── 05 · THE MATH ─────────────── -->
+<section class="slide slide--math" data-notes="Expect: 'but craftsmanship, 18 hours by hand.' Answer: 18 hours of skilled labour is real and it is ALREADY inside the $800. It does not explain the other $9,200.">
+  <div class="wrap">
+    <p class="eyebrow r" data-r="1">ARGUMENT 01 &mdash; THE MATH</p>
+    <h2 class="h2 r" data-r="2">The markup isn&rsquo;t a side effect. <em>It&rsquo;s the product.</em></h2>
+
+    <div class="stats">
+      <div class="stat r" data-r="3">
+        <b class="num" data-count-to="800" data-prefix="~$">~$0</b>
+        <span>Estimated production cost of a basic Herm&egrave;s Birkin</span>
+        <small>Luca Solca, Exane BNP Paribas</small>
+      </div>
+      <div class="stat r" data-r="4">
+        <b class="num num--gold" data-count-to="10000" data-prefix="$" data-suffix="+">$0</b>
+        <span>Entry retail price of that same bag</span>
+        <small>Resale often multiples higher</small>
+      </div>
+      <div class="stat r" data-r="5">
+        <b class="num num--red" data-count-to="12" data-prefix="~" data-suffix="x">~0x</b>
+        <span>The gap between what it costs and what you pay</span>
+        <small class="hot">You are the margin&nbsp;!!</small>
+      </div>
+    </div>
+
+    <div class="margin-bar r" data-r="6">
+      <div class="mb-row">
+        <span class="mb-label">costs them</span>
+        <div class="mb-track"><i class="mb-fill mb-fill--cost"></i><em>$800</em></div>
+      </div>
+      <div class="mb-row">
+        <span class="mb-label">costs you</span>
+        <div class="mb-track">
+          <i class="mb-fill mb-fill--price"></i>
+          <i class="mb-gap"><span>YOU ARE THE MARGIN</span></i>
+          <em>$10,000+</em>
+        </div>
+      </div>
+    </div>
+
+    <p class="footnote r" data-r="7">
+      Their own supply chain said it out loud. In 2025 Chinese manufacturers went viral breaking down a
+      $38,000 Birkin: roughly <b>$450 of leather</b>, and <b>$1,000&ndash;$1,400 all-in</b> including packaging.
+      <cite>Sources: The Economist 1843 (Solca estimate); &lsquo;Trade War TikTok&rsquo; supplier breakdowns, April 2025.</cite>
+    </p>
+  </div>
+</section>
+
+<!-- ─────────────── 06 · FAKE SCARCITY ─────────────── -->
+<section class="slide slide--burn" data-notes="This is your strongest slide. If someone says 'that's just protecting brand value' — yes, exactly. Brand value IS the product. That's my whole argument, thank you.">
+  <div class="fire" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="wrap">
+    <p class="eyebrow r" data-r="1">ARGUMENT 02 &mdash; THE SCARCITY IS FAKE</p>
+    <h2 class="h2 r" data-r="2">They would rather <em class="burnword">burn it</em> than let you afford it.</h2>
+    <p class="lede r" data-r="3">A real shortage means they run out. These brands don&rsquo;t run out &mdash;
+      they destroy the surplus on purpose, because a discount would expose the price as arbitrary.</p>
+
+    <ol class="evidence">
+      <li class="r" data-r="4">
+        <span class="ev-n">1</span>
+        <div>
+          <h3>Burberry burned <b class="num num--red" data-count-to="28.6" data-decimals="1" data-prefix="&pound;" data-suffix="m">&pound;0m</b> of its own stock in one year</h3>
+          <p>&pound;26.9m the year before, and more than <b>&pound;90m destroyed over five years</b> &mdash;
+            disclosed quietly in its own annual report. It only stopped after the public found out in 2018.</p>
+        </div>
+      </li>
+      <li class="r" data-r="5">
+        <span class="ev-n">2</span>
+        <div>
+          <h3>Richemont bought back and disposed of <b class="num num--red" data-count-to="481" data-prefix="~&euro;" data-suffix="m">~&euro;0m</b> in watches</h3>
+          <p>Roughly $557m of product pulled off the market to stop it being discounted on the grey market,
+            which would have dented the brand.</p>
+        </div>
+      </li>
+      <li class="r" data-r="6">
+        <span class="ev-n">3</span>
+        <div>
+          <h3>Herm&egrave;s makes you <b class="gold">audition</b> to be allowed to buy</h3>
+          <p>Customers build &lsquo;purchase history&rsquo; before they&rsquo;re offered a Birkin. That is not a market
+            clearing a price. That is a <b>nightclub door policy that issues receipts</b>.</p>
+        </div>
+      </li>
+    </ol>
+
+    <p class="kicker-out r" data-r="7">Real value survives a discount. A story doesn&rsquo;t &mdash; so they burn the evidence.</p>
+    <cite class="src r" data-r="8">Sources: Burberry FY2018 annual report / BBC / Forbes, 2018; Reuters &amp; CNBC on Richemont buy-backs, 2018.</cite>
+  </div>
+</section>
+
+<!-- ─────────────── 07 · DIAMONDS ─────────────── -->
+<section class="slide slide--diamond" data-notes="Kill-shot line: 'The only thing that made a diamond valuable was that one company decided how many you were allowed to see.'">
+  <div class="wrap">
+    <p class="eyebrow r" data-r="1">ARGUMENT 03 &mdash; THE CASE STUDY</p>
+    <h2 class="h2 r" data-r="2">Diamonds were never rare. <em>They were rationed.</em></h2>
+    <p class="lede r" data-r="3">The clearest proof that a luxury price can be pure invention &mdash;
+      because we can name the company, the ad agency, and the year.</p>
+
+    <div class="timeline r" data-r="4">
+      <div class="tl-track"><i class="tl-progress"></i></div>
+      <ol class="tl-nodes">
+        <li><b>1888</b><h3>The monopoly</h3><p>De Beers consolidates and controls roughly <b>80&ndash;90% of world supply</b> for a century. Supply is throttled, not scarce.</p></li>
+        <li><b>1938</b><h3>The problem</h3><p>Depression-era sales collapse. <b>Fewer than 1 in 10</b> American engagement rings has a diamond. De Beers hires N.W. Ayer.</p></li>
+        <li><b>1947</b><h3>The four words</h3><p>Copywriter Frances Gerety writes <b>&lsquo;A Diamond Is Forever.&rsquo;</b> It also quietly kills resale &mdash; selling one now reads as betraying the marriage.</p></li>
+        <li><b>1980s</b><h3>The invoice</h3><p><b>&lsquo;Two months&rsquo; salary&rsquo;</b> is invented as an ad benchmark. In Japan they pushed three. No tradition. Just a number that maximised spend.</p></li>
+      </ol>
+    </div>
+
+    <div class="proof r" data-r="5">
+      <div class="proof-copy">
+        <h3>THE PROOF: LAB-GROWN</h3>
+        <p>Chemically, optically, physically identical. Same 10 on the Mohs scale. Same GIA grading criteria.
+          The wholesale index is down roughly <b class="num num--red" data-count-to="96" data-suffix="%">0%</b> since 2018.
+          <em>The stone didn&rsquo;t change. Only the story did.</em></p>
+      </div>
+      <svg class="proof-chart" viewBox="0 0 420 170" role="img" aria-label="Lab-grown diamond wholesale index falling roughly 96% since 2018">
+        <defs>
+          <linearGradient id="fallFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#B4231E" stop-opacity=".45"/>
+            <stop offset="100%" stop-color="#B4231E" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <g class="chart-grid">
+          <line x1="30" y1="20" x2="410" y2="20"/><line x1="30" y1="70" x2="410" y2="70"/>
+          <line x1="30" y1="120" x2="410" y2="120"/>
+        </g>
+        <path class="fall-area" d="M30,22 C120,30 170,86 240,116 C310,140 360,146 410,148 L410,150 L30,150 Z" fill="url(#fallFill)"/>
+        <path class="fall-line" d="M30,22 C120,30 170,86 240,116 C310,140 360,146 410,148"/>
+        <circle class="fall-dot" cx="410" cy="148" r="4.5"/>
+        <text class="chart-x" x="30" y="166">2018</text>
+        <text class="chart-x" x="386" y="166">now</text>
+      </svg>
+    </div>
+
+    <cite class="src r" data-r="6">Sources: N.W. Ayer / De Beers campaign history; Ad Age; Edahn Golan / Tenoris wholesale lab-grown index.</cite>
+  </div>
+</section>
+
+<!-- ─────────────── 08 · IT'S NOT EVEN GOOD ─────────────── -->
+<section class="slide slide--versus" data-notes="If they name a genuinely durable item — a good coat, a good boot — concede it FAST and move on. The argument is about the logo tax, not about quality goods existing.">
+  <div class="wrap">
+    <p class="eyebrow r" data-r="1">ARGUMENT 04 &mdash; IT&rsquo;S NOT EVEN GOOD</p>
+    <h2 class="h2 r" data-r="2">Judged as an object, it loses to a <em>$60 backpack</em>.</h2>
+
+    <div class="versus">
+      <div class="vs-col vs-col--lux">
+        <header><span class="vs-price">$2,000</span> designer bag</header>
+        <ul>
+          <li class="r" data-r="3">Coated canvas &mdash; <b>plastic-treated fabric</b> &mdash; on the most recognisable luxury line on earth</li>
+          <li class="r" data-r="5">Deliberately <b>pre-distressed</b> sneakers sold at four figures, as an open joke on the buyer</li>
+          <li class="r" data-r="7">Can&rsquo;t get rained on. Can&rsquo;t be thrown in a car. Needs a <b>dust bag</b> to survive a closet</li>
+          <li class="r" data-r="9">Requires paid repair, paid authentication, and <b>constant anxiety</b></li>
+        </ul>
+      </div>
+
+      <div class="vs-score" aria-hidden="true">
+        <div class="score-num"><b id="scoreL">0</b><i>&ndash;</i><b id="scoreR">0</b></div>
+        <div class="score-cap">functional tests</div>
+      </div>
+
+      <div class="vs-col vs-col--cheap">
+        <header><span class="vs-price">$60</span> bag</header>
+        <ul>
+          <li class="r" data-r="4">Waterproof, warrantied, and <b>repaired free</b> by the manufacturer</li>
+          <li class="r" data-r="6">Holds a laptop, a gym kit, and a gallon of water <b>at the same time</b></li>
+          <li class="r" data-r="8">Costs <b>1&ndash;3% as much</b> &mdash; you could replace it twenty times over</li>
+          <li class="r" data-r="10">Nobody has <b>ever</b> stolen one off someone&rsquo;s shoulder</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="kicker-out r" data-r="11">The cheap one wins every functional test &mdash;
+      so the expensive one <em>isn&rsquo;t competing on function</em>.</p>
+  </div>
+</section>
+
+<!-- ─────────────── 09 · THE MONEY ─────────────── -->
+<section class="slide slide--money" data-notes="Say the compounding number out loud, SLOWLY. Numbers land harder spoken than read. Pre-empt 'you're telling people how to spend their money' by conceding it — yes, I am, and so does every brand with a marketing budget. At least I'm not charging you.">
+  <div class="wrap">
+    <p class="eyebrow r" data-r="1">ARGUMENT 05 &mdash; THE PART NOBODY WANTS TO HEAR</p>
+    <h2 class="h2 r" data-r="2">&ldquo;Feel-good shopping&rdquo; is just bad financial planning, <em>abeg</em>.</h2>
+    <p class="lede r" data-r="3">Buying something that doesn&rsquo;t function better, to change how you feel for an afternoon &mdash;
+      that&rsquo;s not self-care. That&rsquo;s a spending problem with good branding.</p>
+
+    <div class="compound r" data-r="4">
+      <div class="cmp-side">
+        <div class="cmp-card cmp-card--dead">
+          <b class="num" data-count-to="3000" data-prefix="$">$0</b>
+          <p>spent on the bag. Depreciates the second you walk out. Worth a fraction on resale, <i>if anyone wants it at all</i>.</p>
+        </div>
+        <div class="cmp-card cmp-card--alive">
+          <b class="num num--gold" data-count-to="30188" data-prefix="$">$0</b>
+          <p>that same $3,000 invested at 8% for 30 years. Same money. One version <b>shows up for your retirement</b>.</p>
+        </div>
+      </div>
+      <svg class="cmp-chart" viewBox="0 0 460 240" role="img" aria-label="$3,000 flat versus $3,000 compounding to $30,188 over 30 years">
+        <defs>
+          <linearGradient id="growFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#C9A227" stop-opacity=".38"/>
+            <stop offset="100%" stop-color="#C9A227" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <g class="chart-grid">
+          <line x1="40" y1="30" x2="450" y2="30"/><line x1="40" y1="100" x2="450" y2="100"/>
+          <line x1="40" y1="170" x2="450" y2="170"/><line x1="40" y1="205" x2="450" y2="205"/>
+        </g>
+        <path class="grow-area" d="M40,205 C160,200 250,178 330,132 C390,96 425,54 450,26 L450,205 Z" fill="url(#growFill)"/>
+        <path class="grow-line" d="M40,205 C160,200 250,178 330,132 C390,96 425,54 450,26"/>
+        <path class="flat-line" d="M40,205 L450,203"/>
+        <circle class="grow-dot" cx="450" cy="26" r="5"/>
+        <text class="chart-note chart-note--gold" x="446" y="16" text-anchor="end">$30,188</text>
+        <text class="chart-note" x="120" y="197">the bag: still the bag</text>
+        <text class="chart-x" x="40" y="232">year 0</text>
+        <text class="chart-x" x="450" y="232" text-anchor="end">year 30</text>
+      </svg>
+    </div>
+
+    <div class="honest r" data-r="5">
+      <h3>THE HONEST VERSION</h3>
+      <p>Nobody in this room is anti-joy. Spend on food, travel, people, things you&rsquo;ll actually use.
+        But if the purchase only works <b>when someone else notices it</b>, the thing you bought was approval &mdash;
+        and approval has never once appreciated.</p>
+      <p class="honest-aside">Claude, <i>orun gbemi debe</i>!! &nbsp;&#9834;&nbsp; play <i>Allons-y</i></p>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── 10 · COME AT ME ─────────────── -->
+<section class="slide slide--rebut" data-notes="Raise the quiet-luxury one YOURSELF before anyone else does. Stealing your opponent's best argument and answering it makes you look like the most prepared person in the room. Press 1–4 (or click) to flip each card live.">
+  <div class="wrap">
+    <p class="eyebrow r" data-r="1">COME AT ME</p>
+    <h2 class="h2 r" data-r="2">The four counterarguments, and why they lose.</h2>
+    <p class="hint r" data-r="3">Click a card &mdash; or press <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> &mdash; to answer it.</p>
+
+    <div class="flips">
+      <button class="flip r" data-r="4" type="button" data-flip="1">
+        <span class="flip-inner">
+          <span class="flip-face flip-front">
+            <i class="flip-n">01</i>
+            <q>White people signal status too &mdash; quiet luxury is still $4,000 for an unmarked sweater.</q>
+            <em>tap to answer</em>
+          </span>
+          <span class="flip-face flip-back">
+            <p>Correct &mdash; and I&rsquo;ll go further. The vest is a uniform, the watch is a tell, the tote bag is a school.
+              <b>Everyone signals.</b> My point isn&rsquo;t that one group is vainer &mdash; it&rsquo;s that the visible version gets
+              called <i>tacky</i> and the invisible version gets called <i>taste</i>. Both are scams. One just has better PR.</p>
+          </span>
+        </span>
+      </button>
+
+      <button class="flip r" data-r="5" type="button" data-flip="2">
+        <span class="flip-inner">
+          <span class="flip-face flip-front">
+            <i class="flip-n">02</i>
+            <q>Birkins and Chanel flaps appreciate &mdash; it&rsquo;s an investment.</q>
+            <em>tap to answer</em>
+          </span>
+          <span class="flip-face flip-back">
+            <p>A handful of models, for buyers <b>already inside the door</b>, in a market you need existing wealth to access.
+              That&rsquo;s an asset class &mdash; not a defence of the 99% of designer goods that lose most of their value
+              the moment the tag comes off.</p>
+          </span>
+        </span>
+      </button>
+
+      <button class="flip r" data-r="6" type="button" data-flip="3">
+        <span class="flip-inner">
+          <span class="flip-face flip-front">
+            <i class="flip-n">03</i>
+            <q>It&rsquo;s my money and it makes me happy.</q>
+            <em>tap to answer</em>
+          </span>
+          <span class="flip-face flip-back">
+            <p>It&rsquo;s your money. It&rsquo;s <b>also your retirement</b>, and the happiness has a documented half-life of
+              about a week. I&rsquo;m not banning it &mdash; I&rsquo;m saying call it what it is instead of calling it
+              an investment in yourself.</p>
+          </span>
+        </span>
+      </button>
+
+      <button class="flip r" data-r="7" type="button" data-flip="4">
+        <span class="flip-inner">
+          <span class="flip-face flip-front">
+            <i class="flip-n">04</i>
+            <q>The craftsmanship is genuinely superior.</q>
+            <em>tap to answer</em>
+          </span>
+          <span class="flip-face flip-back">
+            <p>Sometimes true &mdash; and <b>already priced in at around $800</b>. Superior craftsmanship explains a 3x markup.
+              It does not explain a 12x one, and it definitely doesn&rsquo;t explain <i>burning the leftovers</i>.</p>
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── 11 · THE UNCOMFORTABLE PART ─────────────── -->
+<section class="slide slide--uncomfy" data-notes="Run the blank-logo test on the room directly. Point at one person. Make them answer. The hesitation is the evidence.">
+  <div class="wrap wrap--center">
+    <p class="eyebrow r" data-r="1">THE UNCOMFORTABLE PART</p>
+    <h2 class="big-line" data-split>Everyone should be financially savvy &mdash; regardless of gender.</h2>
+    <p class="ask-q r" data-r="12">Why do we as a society not <em>yearn</em> to maximise our income?</p>
+    <div class="blank-test r" data-r="13">
+      <div class="bt-item"><div class="bt-bag"><span>?</span></div><p>Take the logo off.</p></div>
+      <div class="bt-item"><div class="bt-bag bt-bag--gone"></div><p>Would you still want it?</p></div>
+      <div class="bt-item"><div class="bt-bag bt-bag--gone"></div><p>That pause is the answer.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── 12 · BONUS TAKE 1 ─────────────── -->
+<section class="slide slide--bonus" data-notes="Delivered light, not scolding. This is the crowd-pleaser — let the room shout. Then move.">
+  <div class="wrap wrap--center">
+    <p class="eyebrow eyebrow--red r" data-r="1">BONUS TAKE 01</p>
+    <div class="receipt r" data-r="2">
+      <div class="receipt-head">
+        <b>THE FREE DINNER</b>
+        <span>ITEMISED &middot; NO REFUNDS</span>
+      </div>
+      <ul class="receipt-lines">
+        <li><span>Vibes</span><b>0.00</b></li>
+        <li><span>Genuine interest</span><b>0.00</b></li>
+        <li><span>Dinner for two</span><b>112.00</b></li>
+        <li><span>Uber both ways</span><b>38.00</b></li>
+        <li><span>Hope</span><b>priceless</b></li>
+      </ul>
+      <div class="receipt-total"><span>TOTAL</span><b>$150.00</b></div>
+      <div class="receipt-stamp">SETTLED IN VIBES</div>
+    </div>
+    <h2 class="bonus-take" data-split>Women lead men on just for vibes when they already know nothing will happen. All na free dinner &mdash; and God will judge you.</h2>
+  </div>
+</section>
+
+<!-- ─────────────── 13 · MUSIC TASTE ─────────────── -->
+<section class="slide slide--music" data-notes="End the takes on the invitation, not a thank-you. You WANT the argument — that's the point of the night.">
+  <div class="eq" aria-hidden="true"></div>
+  <div class="wrap">
+    <p class="eyebrow eyebrow--red r" data-r="1">BONUS TAKE 02 &mdash; THE ASK</p>
+    <h2 class="h2 r" data-r="2">Everyone thinks their music taste is the best. <em>It is mostly trash.</em></h2>
+
+    <div class="music-grid">
+      <div class="music-copy">
+        <p class="r" data-r="3">Yes, music is personal preference &mdash; and if you truly believe that,
+          then this is not for you, and you should <b>never ever criticise someone else&rsquo;s taste</b> again. Ever.</p>
+        <p class="r" data-r="5">It&rsquo;s not always Asake. It&rsquo;s not always Davido.</p>
+      </div>
+      <div class="taste r" data-r="4">
+        <h3>TASTE, DEFINED</h3>
+        <ul>
+          <li><span>Harmony</span></li>
+          <li><span>Rhythm</span></li>
+          <li><span>Transitions</span></li>
+          <li><span>Lyricism</span></li>
+        </ul>
+        <p>Your music shouldn&rsquo;t just be gbedu and vibes. Having taste is having <b>respect</b> for how a
+          record is built. <em>That</em> is the definition.</p>
+      </div>
+    </div>
+
+    <p class="callout r" data-r="6">Rebuttals? <em>Bring something.</em></p>
+  </div>
+</section>
+
+<!-- ─────────────── 14 · THE END ─────────────── -->
+<section class="slide slide--end" data-notes="Mic drop. Don't say thank you — say 'the floor is open.' Then shut up and let them come.">
+  <div class="wrap wrap--center">
+    <h2 class="end-line r" data-r="1">The end.</h2>
+    <p class="end-sub r" data-r="2">With these few points of mine &hellip;</p>
+    <div class="mic" aria-hidden="true">
+      <div class="mic-body"><i></i></div>
+      <div class="mic-stand"></div>
+      <div class="mic-thud"></div>
+    </div>
+    <p class="end-tag r" data-r="4">I don&rsquo;t own anything that needs a dust bag.</p>
+    <div class="byline byline--end r" data-r="5">
+      <span class="byline-rule"></span>
+      Oluwadarasimi &ldquo;Dara&rdquo; Adewumi
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ── presenter notes ──────────────────────────────────────── -->
+<aside class="notes" id="notes" hidden>
+  <header>SPEAKER NOTES <button id="notesClose" type="button" aria-label="Close notes">&times;</button></header>
+  <p id="notesBody"></p>
+</aside>
+
+<!-- ── overview grid ────────────────────────────────────────── -->
+<div class="overview" id="overview" hidden><div class="ov-grid" id="ovGrid"></div></div>
+
+<!-- ── help ─────────────────────────────────────────────────── -->
+<div class="help" id="help" hidden>
+  <div class="help-card">
+    <h3>Driving this thing</h3>
+    <dl>
+      <dt><kbd>&rarr;</kbd> <kbd>&darr;</kbd> <kbd>Space</kbd></dt><dd>next slide</dd>
+      <dt><kbd>&larr;</kbd> <kbd>&uarr;</kbd></dt><dd>previous slide</dd>
+      <dt><kbd>F</kbd></dt><dd>fullscreen</dd>
+      <dt><kbd>N</kbd></dt><dd>speaker notes</dd>
+      <dt><kbd>O</kbd></dt><dd>slide overview</dd>
+      <dt><kbd>B</kbd></dt><dd>blackout (kill the screen mid-argument)</dd>
+      <dt><kbd>A</kbd> <kbd>B</kbd></dt><dd>tally votes on the game slide</dd>
+      <dt><kbd>R</kbd></dt><dd>reveal the game answer</dd>
+      <dt><kbd>1</kbd>&ndash;<kbd>4</kbd></dt><dd>flip a rebuttal card</dd>
+      <dt><kbd>?</kbd></dt><dd>this panel</dd>
+    </dl>
+    <button class="btn" id="helpClose" type="button">Got it</button>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
