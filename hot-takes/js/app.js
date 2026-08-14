@@ -16,9 +16,9 @@ let current = 0;
 // Derive the indices of the interactive slides so reordering the deck
 // never breaks the shortcuts.
 const indexOfSlide = cls => slides.findIndex(s => s.classList.contains(cls));
-const GAME_SLIDE   = indexOfSlide('slide--game');
-const REBUT_SLIDE  = indexOfSlide('slide--rebut');
-const VERSUS_SLIDE = indexOfSlide('slide--versus');
+const EXHIBIT_SLIDE = indexOfSlide('slide--exhibit');
+const REBUT_SLIDE   = indexOfSlide('slide--rebut');
+const VERSUS_SLIDE  = indexOfSlide('slide--versus');
 
 /* ── 1 · staged reveals ─────────────────────────────────── */
 // Each .r element carries data-r (its step). Convert to a delay.
@@ -43,6 +43,8 @@ $$('[data-split]').forEach(el => {
 /* ── 2 · slide activation ───────────────────────────────── */
 const progressBar = $('#progressBar');
 const slideNum    = $('#slideNum');
+const slideTotal  = $('#slideTotal');
+if (slideTotal) slideTotal.textContent = slides.length;
 const notesBody   = $('#notesBody');
 
 function activate(i, { restart = false } = {}) {
@@ -150,68 +152,96 @@ function runScoreboard() {
   }, 620);
 }
 
-/* ── 4 · slide 02: the live vote game ───────────────────── */
-const game = $('#game');
-if (game) {
-  const votes = { A: 0, B: 0 };
-  const meterA = $('#splitA'), meterB = $('#splitB'), label = $('#splitLabel');
-  const vertical = () => innerWidth > 900;
-
-  function paint() {
-    const total = votes.A + votes.B;
-    const pa = total ? votes.A / total * 100 : 0;
-    const on = vertical() ? 'height' : 'width';
-    const off = vertical() ? 'width' : 'height';
-    [meterA, meterB].forEach(m => { m.style[off] = '100%'; });
-    meterA.style[on] = pa + '%';
-    meterB.style[on] = (total ? 100 - pa : 0) + '%';
-    label.textContent = total
-      ? `${Math.round(pa)}% / ${Math.round(100 - pa)}% · ${total} vote${total === 1 ? '' : 's'}`
-      : 'no votes yet';
-  }
-
-  function vote(choice) {
-    votes[choice]++;
-    const card  = $(`.card-vote[data-choice="${choice}"]`, game);
-    const count = $('[data-count]', card);
-    count.textContent = votes[choice];
-    count.classList.remove('pop'); void count.offsetWidth; count.classList.add('pop');
-    paint();
-  }
-
-  $$('.vote-btn', game).forEach(btn =>
-    btn.addEventListener('click', () => vote(btn.closest('.card-vote').dataset.choice)));
-
+/* ── 4 · slide 02: the exhibit ──────────────────────────── */
+/* Every item hides its price behind a "$ ? ?" tag. Click one to turn just
+   that tag over (the room guesses item by item), or press R for the lot.
+   The wall total counts up as tags turn, so the number climbs live. */
+const exhibits = $('#exhibits');
+if (exhibits) {
+  const items    = $$('.ex', exhibits);
+  const totalEl  = $('#exTotal');
+  const noteEl   = $('#exTotalNote');
   const revealBtn = $('#revealBtn');
-  const reveal = () => {
-    game.classList.toggle('is-revealed');
-    revealBtn.textContent = game.classList.contains('is-revealed') ? 'Hide' : 'Reveal';
-  };
-  revealBtn.addEventListener('click', reveal);
+  const money = n => '$' + Math.round(n).toLocaleString('en-US');
 
-  $('#resetBtn').addEventListener('click', () => {
-    votes.A = votes.B = 0;
-    $$('[data-count]', game).forEach(c => c.textContent = '0');
-    game.classList.remove('is-revealed');
-    revealBtn.textContent = 'Reveal';
-    paint();
+  let shown = 0;                                   // what the counter reads now
+  let raf = null;
+
+  function retotal() {
+    const target = items
+      .filter(el => el.classList.contains('turned'))
+      .reduce((sum, el) => sum + Number(el.dataset.price || 0), 0);
+
+    const turned = items.filter(el => el.classList.contains('turned')).length;
+    noteEl.textContent = turned === 0        ? 'turn the tags over'
+                       : turned < items.length ? `${turned} of ${items.length} revealed`
+                       : 'six objects';
+    revealBtn.innerHTML =
+      (turned === items.length ? 'Hide tags' : 'Turn all tags') + ' <kbd>R</kbd>';
+
+    if (reduced) { shown = target; totalEl.textContent = money(target); return; }
+
+    cancelAnimationFrame(raf);
+    const from = shown, t0 = performance.now(), dur = 650;
+    const tick = now => {
+      const pr = Math.min(1, (now - t0) / dur);
+      shown = from + (target - from) * (1 - Math.pow(1 - pr, 3));
+      totalEl.textContent = money(shown);
+      if (pr < 1) raf = requestAnimationFrame(tick);
+      else { shown = target; totalEl.textContent = money(target); }
+    };
+    raf = requestAnimationFrame(tick);
+  }
+
+  const turn = el => { el.classList.toggle('turned'); retotal(); };
+  items.forEach(el => el.addEventListener('click', () => turn(el)));
+
+  revealBtn.addEventListener('click', () => {
+    const showAll = items.some(el => !el.classList.contains('turned'));
+    items.forEach(el => el.classList.toggle('turned', showAll));
+    retotal();
   });
 
-  // Drop in your own real-vs-fake photos without editing any files.
+  $('#resetBtn').addEventListener('click', () => {
+    items.forEach(el => el.classList.remove('turned'));
+    retotal();
+  });
+
+  // Drop in your own photos without editing any files.
   $('#swapInput').addEventListener('change', ev => {
-    const imgs = $$('[data-swap]', game);
-    [...ev.target.files].slice(0, 2).forEach((file, i) => {
-      if (!imgs[i]) return;
+    const imgs = $$('[data-swap]', exhibits);
+    [...ev.target.files].slice(0, imgs.length).forEach((file, i) => {
       const url = URL.createObjectURL(file);
       imgs[i].addEventListener('load', () => URL.revokeObjectURL(url), { once: true });
       imgs[i].src = url;
     });
   });
 
-  addEventListener('resize', paint);
-  game._vote = vote;
-  game._reveal = reveal;
-  paint();
+  exhibits._turnOne = i => { if (items[i]) turn(items[i]); };
+  exhibits._toggleAll = () => revealBtn.click();
+  retotal();
+}
+
+/* ── 4b · slide 03: use the real cover art if it is present ─ */
+/* Drop the sleeve image in at assets/mcbh.jpg and it takes over from the
+   drawn sleeve; until then the drawn one stands in. */
+const sleeveArt = $('.sleeve-art');
+if (sleeveArt) {
+  sleeveArt.addEventListener('load', () => {
+    if (!sleeveArt.naturalWidth) return;
+    sleeveArt.hidden = false;
+    $('.sleeve-drawn')?.remove();
+  });
+  sleeveArt.src = sleeveArt.getAttribute('src');   // re-kick after the listener is on
+}
+
+/* ── 4c · slide 09: the cue line bounces letter by letter ── */
+const cue = $('[data-letters]');
+if (cue && !reduced) {
+  cue.innerHTML = [...cue.textContent].map((ch, i) =>
+    ch === ' ' ? ' '
+      : `<span class="ltr" style="animation-delay:${i * 58}ms">${ch}</span>`
+  ).join('');
 }
 
 /* ── 5 · slide 10: rebuttal flip cards ──────────────────── */
@@ -349,22 +379,22 @@ addEventListener('keydown', e => {
     case 'End':  e.preventDefault(); go(slides.length - 1); return;
   }
 
-  const onGame = current === GAME_SLIDE;
-
   switch (k.toLowerCase()) {
     case 'f': fullscreen(); break;
     case 'n': toggleNotes(); break;
     case 'o': toggleOverview(); break;
+    case 'b': document.body.classList.toggle('is-black'); break;
     case '?': case '/': toggleHelp(true); break;
-    // A / B / R double as vote + reveal, but only while the game is on screen.
-    case 'a': if (onGame) game?._vote('A'); break;
-    case 'b': onGame ? game?._vote('B') : document.body.classList.toggle('is-black'); break;
-    case 'r': if (onGame) game?._reveal(); break;
+    case 'r': if (current === EXHIBIT_SLIDE) exhibits?._toggleAll(); break;
   }
 
-  // Flip rebuttal cards 1–4 on the rebuttals slide.
-  if (current === REBUT_SLIDE && /^[1-4]$/.test(k)) {
-    $(`.flip[data-flip="${k}"]`)?.classList.toggle('flipped');
+  // Number keys mean "the nth thing on this slide" — an exhibit tag here,
+  // a rebuttal card there. Both are gated on the slide being on screen.
+  if (/^[1-9]$/.test(k)) {
+    if (current === EXHIBIT_SLIDE) exhibits?._turnOne(Number(k) - 1);
+    else if (current === REBUT_SLIDE && k <= '4') {
+      $(`.flip[data-flip="${k}"]`)?.classList.toggle('flipped');
+    }
   }
 });
 

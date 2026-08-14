@@ -20,7 +20,7 @@
 <header class="hud" aria-hidden="true">
   <span class="hud-mark">HOT&nbsp;TAKES</span>
   <span class="hud-dot"></span>
-  <span class="hud-slide"><b id="slideNum">01</b>&thinsp;/&thinsp;14</span>
+  <span class="hud-slide"><b id="slideNum">01</b>&thinsp;/&thinsp;<span id="slideTotal">16</span></span>
 </header>
 
 <button class="hud-help" id="helpBtn" title="Keyboard shortcuts (press ?)">?</button>
@@ -65,62 +65,91 @@
   <div class="scroll-cue r" data-r="9" aria-hidden="true">press <kbd>&rarr;</kbd> to begin</div>
 </section>
 
-<!-- ─────────────── 02 · THE GAME ─────────────── -->
-<section class="slide slide--game" data-notes="SETUP: swap in two photos of the SAME model — one authentic, one high-quality replica (edit assets/exhibit-a.png and exhibit-b.png, or click the ⇄ button to load your own). Make everyone commit OUT LOUD before you tally. Press R to reveal. The line is: 'Half of you got it wrong. So what exactly did the extra $3,000 buy?'">
+<!-- ─────────────── 02 · THE EXHIBIT ─────────────── -->
+<section class="slide slide--exhibit" data-notes="Run it as a museum tour, not a quiz. Point at one item, make the room shout a guess OUT LOUD, then click that card to turn its tag over. Nobody guesses high enough — that reaction IS the argument. Click cards one at a time for maximum pain, or press R to flip the whole wall at once. Then read the total and go straight to slide 3. The line is: 'Not one of you guessed high enough. That gap between what you guessed and what it costs — that gap is the whole scam.'">
   <div class="wrap">
-    <p class="eyebrow r" data-r="1">OPENING GAME &mdash; EVERYONE PLAYS</p>
-    <h2 class="h2 r" data-r="2">This is just pure madness.</h2>
-    <p class="lede r" data-r="3">One of these is authentic. One cost 3% of the price.
-      Hands up &mdash; no talking. <b>Commit out loud</b> before I reveal it.</p>
+    <p class="eyebrow r" data-r="1">THE EXHIBIT &mdash; EVERYONE GUESSES</p>
+    <h2 class="h2 r" data-r="2">These are real prices. None of these are typos.</h2>
+    <p class="lede r" data-r="3">Shout your guess before I turn the tag over.
+      <b>Nobody ever guesses high enough</b> &mdash; and that gap is the entire argument.</p>
 
-    <div class="game" id="game">
-      <figure class="card-vote r" data-r="4" data-choice="A">
-        <div class="card-shell">
-          <div class="card-glow"></div>
-          <img src="assets/exhibit-a.png" alt="Exhibit A — a designer handbag" data-swap>
-          <figcaption class="card-cap">EXHIBIT&nbsp;A</figcaption>
-          <div class="verdict verdict--real"><span>AUTHENTIC</span><small>$31,000</small></div>
+    <div class="exhibits" id="exhibits">
+      <figure class="ex ex--photo r" data-r="4" data-price="31000">
+        <div class="ex-frame">
+          <div class="ex-glow"></div>
+          <img src="assets/exhibit-a.png" alt="A designer saddle bag in olive leather" data-swap>
         </div>
-        <button class="vote-btn" type="button">
-          <span class="vote-key">A</span> Vote A
-          <b class="vote-count" data-count>0</b>
-        </button>
+        <figcaption>
+          <b>01</b> Saddle bag, calfskin
+          <span class="ex-tag"><i class="ex-guess">$&nbsp;?&nbsp;?&nbsp;?</i><i class="ex-price">$31,000</i></span>
+        </figcaption>
       </figure>
 
-      <div class="game-mid" aria-hidden="true">
-        <div class="vs">VS</div>
-        <div class="split-meter"><i id="splitA"></i><i id="splitB"></i></div>
-        <div class="split-label" id="splitLabel">no votes yet</div>
+      <figure class="ex ex--photo r" data-r="5" data-price="5000">
+        <div class="ex-frame">
+          <div class="ex-glow"></div>
+          <img src="assets/exhibit-b.png" alt="Black heels with red lacquered soles" data-swap>
+        </div>
+        <figcaption>
+          <b>02</b> Heels. The soles are painted red
+          <span class="ex-tag"><i class="ex-guess">$&nbsp;?&nbsp;?&nbsp;?</i><i class="ex-price">$5,000</i></span>
+        </figcaption>
+      </figure>
+
+      <div class="ex-grid">
+        <figure class="ex ex--card r" data-r="6" data-price="1790">
+          <div class="ex-icon" aria-hidden="true">&#128465;</div>
+          <figcaption>
+            <b>03</b> A leather bag shaped like a bin liner. Sold as &ldquo;Trash Pouch&rdquo;
+            <span class="ex-tag"><i class="ex-guess">$&nbsp;?&nbsp;?</i><i class="ex-price">$1,790</i></span>
+          </figcaption>
+        </figure>
+
+        <figure class="ex ex--card r" data-r="7" data-price="1850">
+          <div class="ex-icon" aria-hidden="true">&#128095;</div>
+          <figcaption>
+            <b>04</b> Sneakers sold pre-shredded. The listing said &ldquo;Full Destroyed&rdquo;
+            <span class="ex-tag"><i class="ex-guess">$&nbsp;?&nbsp;?</i><i class="ex-price">$1,850</i></span>
+          </figcaption>
+        </figure>
+
+        <figure class="ex ex--card r" data-r="8" data-price="1000">
+          <div class="ex-icon" aria-hidden="true">&#129379;</div>
+          <figcaption>
+            <b>05</b> A sterling silver tin can. It is a tin can
+            <span class="ex-tag"><i class="ex-guess">$&nbsp;?&nbsp;?</i><i class="ex-price">$1,000</i></span>
+          </figcaption>
+        </figure>
+
+        <figure class="ex ex--card r" data-r="9" data-price="530">
+          <div class="ex-icon" aria-hidden="true">&#127991;</div>
+          <figcaption>
+            <b>06</b> Sneakers with the dirt and the tape applied at the factory
+            <span class="ex-tag"><i class="ex-guess">$&nbsp;?&nbsp;?</i><i class="ex-price">$530</i></span>
+          </figcaption>
+        </figure>
       </div>
-
-      <figure class="card-vote r" data-r="5" data-choice="B">
-        <div class="card-shell">
-          <div class="card-glow"></div>
-          <img src="assets/exhibit-b.png" alt="Exhibit B — designer footwear" data-swap>
-          <figcaption class="card-cap">EXHIBIT&nbsp;B</figcaption>
-          <div class="verdict verdict--fake"><span>3% OF THE PRICE</span><small>$5,000</small></div>
-        </div>
-        <button class="vote-btn" type="button">
-          <span class="vote-key">B</span> Vote B
-          <b class="vote-count" data-count>0</b>
-        </button>
-      </figure>
     </div>
 
-    <div class="game-bar r" data-r="6">
-      <p class="game-quips">
+    <div class="ex-bar r" data-r="10">
+      <div class="ex-total">
+        <span class="ex-total-cap">Total, this wall</span>
+        <b class="ex-total-num" id="exTotal">$0</b>
+        <em id="exTotalNote">turn the tags over</em>
+      </div>
+      <p class="ex-quips">
         <span>&ldquo;$31k? For <i>this</i>? Are we okay?&rdquo;</span>
-        <span>&ldquo;Why in God&rsquo;s name is this $5k?&rdquo;</span>
-        <span>Some people will <b>justify</b> paying more because there is red paint on the bottom of their shoe.</span>
+        <span>Some people will <b>justify</b> it because there is red paint on the bottom of a shoe.</span>
       </p>
-      <div class="game-ctl">
-        <button class="btn" id="revealBtn" type="button">Reveal <kbd>R</kbd></button>
+      <div class="ex-ctl">
+        <button class="btn" id="revealBtn" type="button">Turn all tags <kbd>R</kbd></button>
         <button class="btn btn--ghost" id="resetBtn" type="button">Reset</button>
-        <label class="btn btn--ghost" title="Load your own images">&#8646; Swap photos
+        <label class="btn btn--ghost" title="Load your own photos">&#8646; Swap photos
           <input type="file" id="swapInput" accept="image/*" multiple hidden>
         </label>
       </div>
     </div>
+    <cite class="src r" data-r="11">Items 03&ndash;06: prices as listed by the brands at launch, widely reported 2018&ndash;2022. Items 01&ndash;02 are my own two openers &mdash; swap the photos for whatever the room will react to hardest.</cite>
   </div>
 </section>
 
@@ -129,10 +158,22 @@
   <div class="wrap wrap--center">
     <p class="eyebrow r" data-r="1">SO WHAT DID YOU ACTUALLY PAY FOR?</p>
     <p class="thesis" data-split>Most people buy designer not because it adds anything to their life &mdash; but because they want to <em>feel among</em>.</p>
-    <p class="thesis-tag r" data-r="9">
-      <span class="note-ico" aria-hidden="true">&#9834;</span>
-      Alexa, play <i>Money Can&rsquo;t Buy Happiness</i> by Asake
-    </p>
+
+    <div class="now-playing r" data-r="9">
+      <div class="sleeve">
+        <div class="vinyl" aria-hidden="true"><i></i></div>
+        <!-- Drop the real cover in at assets/mcbh.jpg and it replaces the drawn sleeve automatically. -->
+        <img class="sleeve-art" src="assets/mcbh.jpg" alt="Money Can&rsquo;t Buy Happiness — Asake" hidden>
+        <div class="sleeve-drawn" aria-hidden="true">
+          <span class="sleeve-artist">ASAKE</span>
+          <span class="sleeve-title">Money<br>Can&rsquo;t Buy<br>Happiness</span>
+        </div>
+      </div>
+      <p class="np-copy">
+        <span class="np-cap"><span class="np-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span> Now playing</span>
+        Alexa, play <i>Money Can&rsquo;t Buy Happiness</i> by Asake
+      </p>
+    </div>
   </div>
 </section>
 
@@ -391,8 +432,15 @@
       <p>Nobody in this room is anti-joy. Spend on food, travel, people, things you&rsquo;ll actually use.
         But if the purchase only works <b>when someone else notices it</b>, the thing you bought was approval &mdash;
         and approval has never once appreciated.</p>
-      <p class="honest-aside">Claude, <i>orun gbemi debe</i>!! &nbsp;&#9834;&nbsp; play <i>Allons-y</i></p>
+      <p class="honest-sub" data-split>Treating yourself once in a while is fine &mdash; the problem is that TikTok
+        and Instagram have <em>over-normalised</em> it, until a haul every month reads as a personality
+        instead of a warning sign.</p>
     </div>
+
+    <p class="cue-track r" data-r="6" aria-label="Claude, otun gbemi debe — play Allonsy">
+      <span class="cue-eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      <span class="cue-words" data-letters>Claude, otun gbemi debe!! &nbsp;play Allonsy</span>
+    </p>
   </div>
 </section>
 
@@ -480,10 +528,10 @@
   </div>
 </section>
 
-<!-- ─────────────── 12 · BONUS TAKE 1 ─────────────── -->
-<section class="slide slide--bonus" data-notes="Delivered light, not scolding. This is the crowd-pleaser — let the room shout. Then move.">
+<!-- ─────────────── 12 · BONUS TAKE 1 — THE CLAIM ─────────────── -->
+<section class="slide slide--bonus" data-notes="Say it flat, then stop talking. Let the room react — the noise IS the transition. Do not defend it yet; the defence is the next slide, and arriving with receipts after they've already shouted is what wins it.">
   <div class="wrap wrap--center">
-    <p class="eyebrow eyebrow--red r" data-r="1">BONUS TAKE 01</p>
+    <p class="eyebrow eyebrow--red r" data-r="1">BONUS TAKE 01 &mdash; THE CLAIM</p>
     <div class="receipt r" data-r="2">
       <div class="receipt-head">
         <b>THE FREE DINNER</b>
@@ -503,11 +551,71 @@
   </div>
 </section>
 
-<!-- ─────────────── 13 · MUSIC TASTE ─────────────── -->
-<section class="slide slide--music" data-notes="End the takes on the invitation, not a thank-you. You WANT the argument — that's the point of the night.">
+<!-- ─────────────── 13 · BONUS TAKE 1 — THE RECEIPTS ─────────────── -->
+<section class="slide slide--thread" data-notes="This is the defence, so deliver it as evidence, not as a rant. Read the thread out loud in the voice — it lands as comedy first and indictment second. Concede the last card fast and loudly: men run their own version, and naming that BEFORE someone else does is what keeps the room with you. End on the ask: a no is free.">
+  <div class="wrap">
+    <p class="eyebrow eyebrow--red r" data-r="1">BONUS TAKE 01 &mdash; THE RECEIPTS</p>
+    <h2 class="h2 r" data-r="2">Nobody is confused. Everybody knows by week two.</h2>
+
+    <div class="thread-wrap">
+      <div class="thread r" data-r="3">
+        <div class="th-day">Tuesday</div>
+        <div class="msg msg--out">so are we doing Friday? &#128064;</div>
+        <div class="msg msg--in">omg yes!! let&rsquo;s do it</div>
+        <div class="th-day">Friday, 6:40pm</div>
+        <div class="msg msg--in">babe I&rsquo;m so sorry something came up &#128557;</div>
+        <div class="msg msg--out">no worries. next week?</div>
+        <div class="msg msg--in">100%</div>
+        <div class="th-day">Three weeks later</div>
+        <div class="msg msg--in">heyyy stranger &#128517;</div>
+        <div class="msg msg--out msg--typing"><i></i><i></i><i></i></div>
+      </div>
+
+      <ol class="claims">
+        <li class="r" data-r="4">
+          <span class="claim-n">01</span>
+          <div>
+            <h3>The dinner was never the cost</h3>
+            <p>It&rsquo;s six weeks of someone&rsquo;s Friday nights, held open for a thing you decided against
+              before the starters came. <b>You can replace $150. You cannot replace the six weeks.</b></p>
+          </div>
+        </li>
+        <li class="r" data-r="5">
+          <span class="claim-n">02</span>
+          <div>
+            <h3>Attention is free to give and expensive to receive</h3>
+            <p>Keeping someone warm costs you one text a week. It costs him a whole imagined future.
+              That asymmetry is exactly why it keeps happening &mdash; <b>there is no bill</b>.</p>
+          </div>
+        </li>
+        <li class="r" data-r="6">
+          <span class="claim-n">03</span>
+          <div>
+            <h3>Same slide as the bags, honestly</h3>
+            <p>A man buys a logo to be seen a certain way. Somebody keeps a roster to <em>feel</em> a certain way.
+              Both are paying for the reaction, not the thing. <b>I&rsquo;m consistent &mdash; I&rsquo;m against both.</b></p>
+          </div>
+        </li>
+        <li class="r conceded" data-r="7">
+          <span class="claim-n">&#10003;</span>
+          <div>
+            <h3>Before you come for me &mdash; yes, men run this too</h3>
+            <p>Men keep people on read for months for the exact same reason: it feels good to be wanted.
+              Same crime, different currency, and I&rsquo;ll take that L now so nobody thinks they&rsquo;ve caught me.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <p class="kicker-out r" data-r="8">A &ldquo;no&rdquo; costs you nothing and gives him his month back. A &ldquo;maybe&rdquo; is an invoice you&rsquo;re sending someone who can&rsquo;t see the total.</p>
+  </div>
+</section>
+
+<!-- ─────────────── 14 · BONUS TAKE 2 — THE CLAIM ─────────────── -->
+<section class="slide slide--music" data-notes="Lean into the arrogance here — it's funnier and it bait the room properly. The definition card is the part that makes you sound serious rather than snobbish, so slow down on those four words.">
   <div class="eq" aria-hidden="true"></div>
   <div class="wrap">
-    <p class="eyebrow eyebrow--red r" data-r="1">BONUS TAKE 02 &mdash; THE ASK</p>
+    <p class="eyebrow eyebrow--red r" data-r="1">BONUS TAKE 02 &mdash; THE CLAIM</p>
     <h2 class="h2 r" data-r="2">Everyone thinks their music taste is the best. <em>It is mostly trash.</em></h2>
 
     <div class="music-grid">
@@ -528,16 +636,77 @@
           record is built. <em>That</em> is the definition.</p>
       </div>
     </div>
-
-    <p class="callout r" data-r="6">Rebuttals? <em>Bring something.</em></p>
   </div>
 </section>
 
-<!-- ─────────────── 14 · THE END ─────────────── -->
+<!-- ─────────────── 15 · BONUS TAKE 2 — THE PROOF ─────────────── -->
+<section class="slide slide--algo" data-notes="Run the test on the room for real. Point at one person, make them name a song nobody else knows. The stalling is the evidence — same move as the blank-logo test, and it ties both bonus takes back to the main argument. Then end on the invitation, not a thank-you. You WANT the argument.">
+  <div class="wrap">
+    <p class="eyebrow eyebrow--red r" data-r="1">BONUS TAKE 02 &mdash; THE PROOF</p>
+    <h2 class="h2 r" data-r="2">You didn&rsquo;t pick those songs. <em>Something picked them for you.</em></h2>
+
+    <div class="algo">
+      <div class="wrapped r" data-r="3">
+        <h3>YOUR TOP 5 THIS YEAR</h3>
+        <ol class="wrapped-list">
+          <li><b>1</b><span class="bar" style="--w:100%"></span><i>#2 on the chart</i></li>
+          <li><b>2</b><span class="bar" style="--w:86%"></span><i>#1 on the chart</i></li>
+          <li><b>3</b><span class="bar" style="--w:71%"></span><i>#4 on the chart</i></li>
+          <li><b>4</b><span class="bar" style="--w:58%"></span><i>#3 on the chart</i></li>
+          <li><b>5</b><span class="bar" style="--w:44%"></span><i>#7 on the chart</i></li>
+        </ol>
+        <div class="wrapped-stamp">THIS IS JUST THE CHART</div>
+      </div>
+
+      <ol class="claims claims--tight">
+        <li class="r" data-r="4">
+          <span class="claim-n">01</span>
+          <div>
+            <h3>Autoplay is not a decision</h3>
+            <p>Most people have never chosen a song in their life. They&rsquo;ve <b>accepted</b> one &mdash;
+              queued by a machine optimising for how long you stay, not for what&rsquo;s good.</p>
+          </div>
+        </li>
+        <li class="r" data-r="5">
+          <span class="claim-n">02</span>
+          <div>
+            <h3>Nobody&rsquo;s favourite song is older than their account</h3>
+            <p>Ask around the room. The library starts the year the app was installed.
+              That isn&rsquo;t a taste &mdash; <b>that&rsquo;s a subscription history</b>.</p>
+          </div>
+        </li>
+        <li class="r" data-r="6">
+          <span class="claim-n">03</span>
+          <div>
+            <h3>Liking what&rsquo;s popular isn&rsquo;t taste, it&rsquo;s attendance</h3>
+            <p>Exactly the same machinery as the bags: something gets made desirable, everybody
+              agrees at once, and we all call the agreement <em>personality</em>.</p>
+          </div>
+        </li>
+        <li class="r conceded" data-r="7">
+          <span class="claim-n">&#10003;</span>
+          <div>
+            <h3>And no &mdash; popular doesn&rsquo;t mean bad</h3>
+            <p>Asake is genuinely good. So is Davido. The problem isn&rsquo;t that they&rsquo;re in your library,
+              it&rsquo;s that <b>nothing else is</b>.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="taste-test r" data-r="8">
+      <p><b>THE TEST:</b> name one song you love that nobody in this room has heard.
+        If you have to think &mdash; you don&rsquo;t have taste. You have a feed.</p>
+      <p class="callout">Rebuttals? <em>Bring something.</em></p>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── 16 · THE END ─────────────── -->
 <section class="slide slide--end" data-notes="Mic drop. Don't say thank you — say 'the floor is open.' Then shut up and let them come.">
   <div class="wrap wrap--center">
-    <h2 class="end-line r" data-r="1">The end.</h2>
-    <p class="end-sub r" data-r="2">With these few points of mine &hellip;</p>
+    <p class="end-sub r" data-r="1">The end.</p>
+    <h2 class="end-line" data-split>With these few points of mine&hellip;</h2>
     <div class="mic" aria-hidden="true">
       <div class="mic-body"><i></i></div>
       <div class="mic-stand"></div>
@@ -573,9 +742,8 @@
       <dt><kbd>N</kbd></dt><dd>speaker notes</dd>
       <dt><kbd>O</kbd></dt><dd>slide overview</dd>
       <dt><kbd>B</kbd></dt><dd>blackout (kill the screen mid-argument)</dd>
-      <dt><kbd>A</kbd> <kbd>B</kbd></dt><dd>tally votes on the game slide</dd>
-      <dt><kbd>R</kbd></dt><dd>reveal the game answer</dd>
-      <dt><kbd>1</kbd>&ndash;<kbd>4</kbd></dt><dd>flip a rebuttal card</dd>
+      <dt><kbd>R</kbd></dt><dd>turn every price tag on the exhibit</dd>
+      <dt><kbd>1</kbd>&ndash;<kbd>6</kbd></dt><dd>turn one exhibit tag &middot; flip one rebuttal card</dd>
       <dt><kbd>?</kbd></dt><dd>this panel</dd>
     </dl>
     <button class="btn" id="helpClose" type="button">Got it</button>
