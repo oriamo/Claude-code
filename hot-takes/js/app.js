@@ -28,16 +28,29 @@ $$('.r').forEach(el => {
 });
 
 // Split [data-split] copy into per-word spans so lines land word by word.
+// This walks text nodes rather than slicing innerHTML on whitespace: a string
+// split would cut inside `<i class="hot">` and spill the attribute as text,
+// and would break the nesting of any inline tag spanning two words.
 $$('[data-split]').forEach(el => {
-  const html = el.innerHTML;
-  // Preserve inline <em>/<i>/<b> by splitting on spaces outside of tags.
-  el.innerHTML = html.split(/(\s+)/).map(chunk => {
-    if (!chunk.trim()) return chunk;
-    return `<span class="w">${chunk}</span>`;
-  }).join('');
-  $$('.w', el).forEach((w, i) => {
-    w.style.animationDelay = `${300 + i * 70}ms`;
-  });
+  let n = 0;
+  (function walk(node) {
+    [...node.childNodes].forEach(child => {
+      if (child.nodeType === Node.ELEMENT_NODE) return walk(child);
+      if (child.nodeType !== Node.TEXT_NODE) return;
+
+      const frag = document.createDocumentFragment();
+      child.textContent.split(/(\s+)/).forEach(chunk => {
+        if (!chunk) return;
+        if (!chunk.trim()) return frag.append(chunk);   // keep the spacing
+        const w = document.createElement('span');
+        w.className = 'w';
+        w.textContent = chunk;
+        w.style.animationDelay = `${300 + n++ * 70}ms`;
+        frag.append(w);
+      });
+      child.replaceWith(frag);
+    });
+  })(el);
 });
 
 /* ── 2 · slide activation ───────────────────────────────── */

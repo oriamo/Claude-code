@@ -44,9 +44,11 @@ an exhibit tag on slide 2, a rebuttal card on slide 10 — and do nothing anywhe
 | 11 | Uncomfortable part | The blank-logo test, staged: the logo disappears across three frames |
 | 12 | Bonus 01 — the claim | A receipt prints out and gets stamped **SETTLED IN VIBES** |
 | 13 | Bonus 01 — the receipts | A message thread types itself out over three weeks, beside three claims and one you concede before anyone can throw it |
-| 14 | Bonus 02 — the claim | Equaliser bars run behind the four pillars of actual taste |
-| 15 | Bonus 02 — the proof | A Wrapped-style top 5 fills in, then gets stamped **THIS IS JUST THE CHART**, and the room gets tested live |
-| 16 | The end | Mic drop with an impact ripple |
+| 14 | Bonus 02 — the claim | Four competence switches flip themselves **off**, one per beat, beside the claim |
+| 15 | Bonus 02 — the proof | A said → meant column translates each phrase into the task it hands over |
+| 16 | Bonus 03 — the claim | Equaliser bars run behind the four pillars of actual taste |
+| 17 | Bonus 03 — the proof | A Wrapped-style top 5 fills in, then gets stamped **THIS IS JUST THE CHART**, and the room gets tested live |
+| 18 | The end | Mic drop with an impact ripple |
 
 ## Before you present
 
@@ -96,7 +98,7 @@ server. Chrome or Safari fullscreen (<kbd>F</kbd>) is the intended presenting mo
 
 ```
 hot-takes/
-├── index.html          all 16 slides
+├── index.html          all 18 slides
 ├── css/styles.css      palette, layout, every animation
 ├── js/app.js           navigation, counters, exhibit, notes, overview
 └── assets/             exhibit-a.png, exhibit-b.png
