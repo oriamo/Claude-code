@@ -935,10 +935,6 @@ body.is-black .blackout{opacity:1}
   from{opacity:.9;transform:scale(.4)}
   to{opacity:0;transform:scale(9)}
 }
-.end-tag{
-  margin:clamp(1.4rem,3vh,2.2rem) 0 0;font-size:1rem;color:var(--gold);
-  letter-spacing:.06em;font-style:italic;
-}
 .byline--end{justify-content:center}
 
 /* ═══ overlays: notes / overview / help ═══════════════════ */
