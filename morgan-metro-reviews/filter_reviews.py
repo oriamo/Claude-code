@@ -14,9 +14,12 @@ shows prospect signals AND no lived-there signals, so genuine resident reviews
 that happen to praise the leasing agent survive. Everything ambiguous is routed
 to a `needs_review` bucket for a human rather than being silently discarded.
 
+Accepts any number of scraper outputs and merges them, so Google,
+ApartmentRatings and Yelp go through one identical set of gates.
+
 Usage
 -----
-    python filter_reviews.py reviews_google.json --years 3 --out filtered.json
+    python filter_reviews.py reviews_*.json --years 3 --out filtered.json
     python filter_reviews.py reviews_google.json --print-kept
 """
 
@@ -26,7 +29,7 @@ import argparse
 import json
 import re
 import sys
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
 # --- Signals that the writer actually lived in a unit -------------------------
@@ -80,18 +83,46 @@ def matches(text: str, patterns: list[re.Pattern[str]]) -> list[str]:
 
 
 def review_date(review: dict[str, Any]) -> date | None:
-    """Prefer the exact timestamp; fall back to the resolved relative date."""
+    """Resolve a record's date, tolerating the older pre-schema field names."""
+    for field in ("date", "approx_date"):
+        value = review.get(field)
+        if value:
+            try:
+                return date.fromisoformat(value)
+            except (ValueError, TypeError):
+                continue
+
     micros = review.get("timestamp_us")
     if isinstance(micros, (int, float)) and micros > 0:
-        return datetime.utcfromtimestamp(micros / 1_000_000).date()
-
-    approx = review.get("approx_date")
-    if approx:
-        try:
-            return date.fromisoformat(approx)
-        except ValueError:
-            pass
+        return datetime.fromtimestamp(micros / 1_000_000, tz=timezone.utc).date()
     return None
+
+
+def load_reviews(paths: list[str]) -> list[dict[str, Any]]:
+    """Merge every scraper output into one list, de-duplicated by review id."""
+    merged: list[dict[str, Any]] = []
+    for path in paths:
+        with open(path, encoding="utf-8") as handle:
+            payload = json.load(handle)
+
+        records = payload["reviews"] if isinstance(payload, dict) else payload
+        source = payload.get("source", "unknown") if isinstance(payload, dict) else "unknown"
+        for record in records:
+            record.setdefault("source", source)
+        merged.extend(records)
+        print(f"loaded {len(records):>4} from {path}", file=sys.stderr)
+
+    seen: set[str] = set()
+    unique = []
+    for record in merged:
+        key = record.get("review_id") or f"anon:{abs(hash(record.get('text', '')[:120]))}"
+        if key not in seen:
+            seen.add(key)
+            unique.append(record)
+
+    if len(unique) != len(merged):
+        print(f"dropped {len(merged) - len(unique)} duplicate ids", file=sys.stderr)
+    return unique
 
 
 def classify(review: dict[str, Any], cutoff: date) -> dict[str, Any]:
@@ -144,16 +175,13 @@ def classify(review: dict[str, Any], cutoff: date) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("infile")
+    parser.add_argument("infiles", nargs="+", help="One or more scraper outputs")
     parser.add_argument("--years", type=float, default=3.0)
     parser.add_argument("--out", default="reviews_filtered.json")
     parser.add_argument("--print-kept", action="store_true")
     args = parser.parse_args()
 
-    with open(args.infile, encoding="utf-8") as handle:
-        payload = json.load(handle)
-
-    reviews = payload["reviews"] if isinstance(payload, dict) else payload
+    reviews = load_reviews(args.infiles)
     cutoff = date.today() - timedelta(days=365.25 * args.years)
 
     classified = [classify(r, cutoff) for r in reviews]
@@ -184,6 +212,15 @@ def main() -> int:
     print(f"REMAINING (kept)       : {len(kept)}")
     print(f"  ...mentioning stadium/event traffic: {len(stadium)}")
 
+    sources = sorted({r.get("source", "unknown") for r in classified})
+    if len(sources) > 1:
+        print(f"{'-' * 58}")
+        print(f"  {'source':<20}{'accessed':>10}{'filtered':>10}{'kept':>8}")
+        for name in sources:
+            got = [r for r in classified if r.get("source") == name]
+            held = [r for r in got if r["verdict"] == "kept"]
+            print(f"  {name:<20}{len(got):>10}{len(got) - len(held):>10}{len(held):>8}")
+
     if kept:
         rated = [r["rating"] for r in kept if isinstance(r.get("rating"), (int, float))]
         if rated:
@@ -195,7 +232,7 @@ def main() -> int:
     if args.print_kept:
         for review in sorted(kept, key=lambda r: r["resolved_date"] or "", reverse=True):
             print(f"[{review['resolved_date']}] {review['rating']}* "
-                  f"{review.get('author') or 'anon'}")
+                  f"{review.get('author') or 'anon'} ({review.get('source', '?')})")
             print(f"  {review['text'][:600]}\n")
 
     with open(args.out, "w", encoding="utf-8") as handle:

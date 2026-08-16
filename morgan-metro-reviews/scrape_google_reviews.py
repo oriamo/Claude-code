@@ -32,15 +32,14 @@ import json
 import re
 import sys
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Any, Iterator
 
 import requests
 
-UA = (
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
-    "(KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
-)
+from common import UA, dedupe, make_record, write_output
+
+SOURCE = "google"
 
 # Sort orders accepted by the endpoint.
 SORT = {"relevance": 1, "newest": 2, "highest": 3, "lowest": 4}
@@ -95,41 +94,35 @@ def _dig(obj: Any, *path: int, default: Any = None) -> Any:
     return obj if obj is not None else default
 
 
-def relative_to_date(text: str, now: datetime) -> str | None:
-    """Turn 'a year ago' / '3 months ago' into an approximate ISO date."""
-    if not text:
-        return None
-    match = re.search(
-        r"(a|an|\d+)\s+(minute|hour|day|week|month|year)s?\s+ago", text, re.I
-    )
-    if not match:
-        return None
-
-    count = 1 if match.group(1).lower() in ("a", "an") else int(match.group(1))
-    unit = match.group(2).lower()
-    days = {
-        "minute": 0, "hour": 0, "day": 1,
-        "week": 7, "month": 30.44, "year": 365.25,
-    }[unit]
-    return (now - timedelta(days=days * count)).date().isoformat()
-
-
-def extract_review(entry: Any, now: datetime) -> dict[str, Any]:
-    """Map one raw entry onto a flat, analysis-friendly record."""
+def extract_review(entry: Any) -> dict[str, Any]:
+    """Map one raw entry onto the shared record schema."""
+    micros = _dig(entry, 0, 1, 5, 0)
     relative = _dig(entry, 0, 1, 6)
-    return {
-        "review_id": _dig(entry, 0, 0),
-        "author": _dig(entry, 0, 1, 4, 5, 0),
-        "author_review_count": _dig(entry, 0, 1, 4, 5, 5),
-        "rating": _dig(entry, 0, 2, 0, 0),
-        "relative_date": relative,
-        "approx_date": relative_to_date(relative or "", now),
-        "timestamp_us": _dig(entry, 0, 1, 5, 0),
-        "text": _dig(entry, 0, 2, 15, 0, 0) or "",
-        "owner_response": _dig(entry, 0, 3, 14, 0, 0),
-        "local_guide": bool(_dig(entry, 0, 1, 4, 5, 10)),
-        "photo_count": len(_dig(entry, 0, 2, 2, default=[]) or []),
-    }
+
+    # An exact timestamp beats Google's relative label whenever it is present.
+    raw_date = relative
+    if isinstance(micros, (int, float)) and micros > 0:
+        raw_date = datetime.fromtimestamp(
+            micros / 1_000_000, tz=timezone.utc
+        ).date().isoformat()
+
+    record = make_record(
+        source=SOURCE,
+        review_id=str(_dig(entry, 0, 0)),
+        text=_dig(entry, 0, 2, 15, 0, 0) or "",
+        rating=_dig(entry, 0, 2, 0, 0),
+        raw_date=raw_date,
+        author=_dig(entry, 0, 1, 4, 5, 0),
+        owner_response=_dig(entry, 0, 3, 14, 0, 0),
+    )
+    record.update(
+        {
+            "relative_date": relative,
+            "local_guide": bool(_dig(entry, 0, 1, 4, 5, 10)),
+            "photo_count": len(_dig(entry, 0, 2, 2, default=[]) or []),
+        }
+    )
+    return record
 
 
 def iter_reviews(
@@ -141,7 +134,6 @@ def iter_reviews(
     max_pages: int = 500,
 ) -> Iterator[dict[str, Any]]:
     """Yield every review, walking the pagination cursor to exhaustion."""
-    now = datetime.now(timezone.utc)
     token, pages = "", 0
 
     while pages < max_pages:
@@ -159,7 +151,7 @@ def iter_reviews(
             break
 
         for entry in entries:
-            yield extract_review(entry, now)
+            yield extract_review(entry)
 
         pages += 1
         print(f"  page {pages}: +{len(entries)} reviews", file=sys.stderr)
@@ -194,18 +186,8 @@ def main() -> int:
     )
 
     # The endpoint can repeat entries across page boundaries.
-    unique = list({r["review_id"]: r for r in reviews}.values())
-
-    with open(args.out, "w", encoding="utf-8") as handle:
-        json.dump(
-            {
-                "feature_id": feature_id,
-                "scraped_at": datetime.now(timezone.utc).isoformat(),
-                "total_scraped": len(unique),
-                "reviews": unique,
-            },
-            handle, indent=2, ensure_ascii=False,
-        )
+    unique = dedupe(reviews)
+    write_output(args.out, SOURCE, unique, feature_id=feature_id)
 
     print(f"\nwrote {len(unique)} unique reviews -> {args.out}", file=sys.stderr)
     return 0

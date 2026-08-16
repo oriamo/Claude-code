@@ -14,24 +14,67 @@ unrestricted machine and it will produce the counts directly.
 ## Install
 
 ```bash
-pip install requests
+pip install requests beautifulsoup4 lxml
 ```
 
 ## Run
 
 ```bash
-# 1. Pull every Google review, newest first
+# 1. Google — the full list, newest first
 python scrape_google_reviews.py \
     --url "https://maps.app.goo.gl/4YapY447cE8UuaF8A" \
     --out reviews_google.json
 
-# 2. Filter to residents, last 3 years, with a full audit trail
-python filter_reviews.py reviews_google.json --years 3 --print-kept
+# 2. ApartmentRatings — walks ?page=N to exhaustion
+python scrape_apartmentratings.py \
+    --url "https://www.apartmentratings.com/md/landover/the-villages-at-morgan-metro_301336406020785/" \
+    --out reviews_apartmentratings.json
+
+# 3. Yelp — note this property has TWO listings, scrape both
+python scrape_yelp.py --slug villages-at-morgan-metro-landover-2 \
+    --out reviews_yelp.json
+python scrape_yelp.py \
+    --slug villages-at-morgan-metro-apartments-by-pinnacle-cushwake-landover \
+    --out reviews_yelp_closed.json
+
+# 4. One filter over everything, with a full audit trail
+python filter_reviews.py reviews_*.json --years 3 --print-kept
 ```
 
 `filter_reviews.py` prints exactly the three numbers you want — total accessed,
-total filtered out (broken down by reason), and total remaining — plus a count of
-how many surviving reviews mention stadium/event traffic.
+total filtered out (broken down by reason), and total remaining — plus a per-source
+table and a count of how many surviving reviews mention stadium/event traffic.
+
+## Architecture
+
+`common.py` defines one flat record schema that every scraper emits, so the filter
+never special-cases a source:
+
+| field | notes |
+|---|---|
+| `source` | `google` / `apartmentratings` / `yelp` |
+| `review_id` | namespaced by source, so merges can't collide |
+| `rating` | normalised to a 1–5 scale via `scale=` |
+| `date` + `date_precision` | `exact` when the site printed a real date, `approx` when resolved from "3 months ago" |
+| `raw_date` | whatever the site actually printed, kept for auditing |
+
+Adding a fourth source (Apartments.com, ForRent, VeryApt) means writing a scraper
+that calls `make_record()` and `write_output()`. The filter picks it up with no changes.
+
+### Per-source extraction notes
+
+**Google** calls the internal `listugcposts` endpoint — the same one the Maps UI
+uses. This is what gets you the *full* list; the official Places API caps at 5 reviews.
+
+**ApartmentRatings** tries schema.org JSON-LD first and falls back to HTML block
+parsing. The fallback matches on class-name *substrings* rather than exact selectors,
+because the site renames its CSS periodically. It also stops when a page repeats an
+earlier page's contents, since out-of-range pages there clamp back to page 1 rather
+than 404.
+
+**Yelp** renders reviews client-side, so the HTML shell is useless — this hits the
+`review_feed` JSON endpoint the page itself calls, which requires a `Referer` header
+pointing at the business page.
 
 ## How the filters work
 
@@ -49,10 +92,25 @@ reviews land in `needs_review` for a human instead of being silently discarded.
 Every verdict records the substrings that triggered it, so you can audit any decision
 in the output JSON rather than trusting the classifier blind.
 
-## Extending to other sources
+## Known review pools
 
-Google is the largest single pool but not the only one. ApartmentRatings (~114 reviews),
-Apartments.com, Yelp (two listings — the live one and a closed Pinnacle/Cushwake
-listing), VeryApt (6), and ForRent (~172 ratings) all carry reviews. `filter_reviews.py`
-accepts any JSON list whose records expose `text`, `rating`, and either `timestamp_us`
-or `approx_date`, so point a scraper at those and reuse the same gates.
+| Source | Pool size | Published rating | Covered here |
+|---|---|---|---|
+| Google | unknown | — | yes |
+| ApartmentRatings | 113–114 | 3.1 / 5 | yes |
+| Yelp (live listing) | small | — | yes |
+| Yelp (closed Pinnacle/Cushwake listing) | ~28 | — | yes |
+| ForRent | ~172 | 4.2 / 5 | not yet |
+| VeryApt | 6 | 6.5 "Good" | not yet |
+
+The ForRent 4.2 against ApartmentRatings 3.1 on the same property is worth noting:
+syndicated feeds tend to carry a high share of leasing-office reviews, which is exactly
+what the tenancy gate strips out.
+
+## Caveat on testing
+
+The parsing, date-resolution, merge and filter logic are all exercised against fixtures.
+The **network paths were never executed** because of the egress block described above, so
+validate each scraper's first live run before trusting its counts — particularly the
+ApartmentRatings HTML fallback and the Yelp feed shape, which are the two most likely to
+have drifted.
